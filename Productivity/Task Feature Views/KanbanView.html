@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Task Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { margin: 0; padding: 0; }
+    .kanban-column { min-width: 320px; max-width: 320px; }
+    .task-card { cursor: pointer; transition: all 0.2s; }
+    .task-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .priority-high { border-left: 4px solid #ef4444; }
+    .priority-medium { border-left: 4px solid #f59e0b; }
+    .priority-low { border-left: 4px solid #10b981; }
+    .importance-critical { background: #fee; }
+    .importance-high { background: #fef3c7; }
+    .urgency-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
+    .markdown-content { line-height: 1.6; }
+    .markdown-content h1 { font-size: 1.5rem; font-weight: bold; margin: 1rem 0; }
+    .markdown-content h2 { font-size: 1.25rem; font-weight: bold; margin: 0.75rem 0; }
+    .markdown-content p { margin: 0.5rem 0; }
+    .markdown-content ul { list-style: disc; margin-left: 1.5rem; }
+    .markdown-content code { background: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
+    .add-column-btn { min-width: 280px; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const icons = {
+      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+      x: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+      calendar: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+      clock: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+      flag: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>`,
+      paperclip: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>`,
+      link: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+      tag: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`,
+      chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
+      edit: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+      trash: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+      folder: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`
+    };
+
+    let state = {
+      tasks: [
+        { 
+          id: 1, 
+          title: 'Math Homework',
+          parentTaskId: null,
+          status: 'In Progress',
+          dueDate: '2026-01-15',
+          dueTime: '14:00',
+          startDate: '2026-01-01',
+          timeEstimate: '4h',
+          importanceLevel: 'High',
+          urgency: 'High',
+          state: 'Active',
+          completionTimestamp: '',
+          tags: ['school', 'math'],
+          subject: 'Mathematics',
+          projectLink: '',
+          impactScore: 8,
+          blockReason: '',
+          notes: '# Study Plan\n\n- Review chapters 1-3\n- Complete practice problems\n- Prepare for quiz',
+          attachments: [],
+          linkedDocs: [],
+          webClips: [],
+          recurrenceRule: '',
+          progress: 50
+        },
+        { 
+          id: 2, 
+          title: 'Science Project',
+          parentTaskId: null,
+          status: 'Not Started',
+          dueDate: '2026-02-01',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '10h',
+          importanceLevel: 'High',
+          urgency: 'Medium',
+          state: 'Active',
+          completionTimestamp: '',
+          tags: ['school', 'science'],
+          subject: 'Science',
+          projectLink: '',
+          impactScore: 9,
+          blockReason: '',
+          notes: '',
+          attachments: [],
+          linkedDocs: [],
+          webClips: [],
+          recurrenceRule: '',
+          progress: 0
+        },
+        { 
+          id: 3, 
+          title: 'Complete worksheet packets', 
+          parentTaskId: 1,
+          status: 'In Progress',
+          dueDate: '2026-01-10',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '2h',
+          importanceLevel: 'Medium',
+          urgency: 'Medium',
+          state: 'Active',
+          completionTimestamp: '',
+          tags: ['homework'],
+          subject: 'Mathematics',
+          projectLink: '',
+          impactScore: 5,
+          blockReason: '',
+          notes: '',
+          attachments: [],
+          linkedDocs: [],
+          webClips: [],
+          recurrenceRule: '',
+          progress: 30
+        },
+        { 
+          id: 4, 
+          title: 'Study for quiz', 
+          parentTaskId: 1,
+          status: 'Not Started',
+          dueDate: '2026-01-12',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '1.5h',
+          importanceLevel: 'High',
+          urgency: 'Medium',
+          state: 'Active',
+          completionTimestamp: '',
+          tags: ['exam'],
+          subject: 'Mathematics',
+          projectLink: '',
+          impactScore: 7,
+          blockReason: '',
+          notes: '',
+          attachments: [],
+          linkedDocs: [],
+          webClips: [],
+          recurrenceRule: '',
+          progress: 0
+        }
+      ],
+      parentTasks: [],
+      expandedTask: null,
+      showAddModal: false,
+      showAddColumnModal: false,
+      editingTitle: null,
+      editingColumnId: null,
+      newColumnName: '',
+      newTask: {
+        title: '',
+        parentTaskId: null,
+        status: 'Not Started',
+        dueDate: '',
+        dueTime: '',
+        startDate: '',
+        timeEstimate: '',
+        importanceLevel: 'Medium',
+        urgency: 'Medium',
+        tags: '',
+        subject: '',
+        projectLink: '',
+        recurrenceRule: ''
+      }
+    };
+
+    function initializeParentTasks() {
+      const existingParents = new Set(state.tasks.filter(t => !t.parentTaskId).map(t => t.id));
+      const usedParents = new Set(state.tasks.filter(t => t.parentTaskId).map(t => t.parentTaskId));
+      
+      if (state.parentTasks.length === 0) {
+        state.parentTasks = Array.from(existingParents).map(id => {
+          const task = state.tasks.find(t => t.id === id);
+          return { id, name: task.title };
+        });
+        
+        if (state.parentTasks.length === 0) {
+          state.parentTasks = [
+            { id: 1, name: 'Math Homework' },
+            { id: 2, name: 'Science Project' }
+          ];
+        }
+      }
+    }
+
+    function parseMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/^- (.*$)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^(?!<[hul])/gm, '<p>')
+        .replace(/(?<![>])$/gm, '</p>');
+    }
+
+    function getUrgencyColor(urgency) {
+      const colors = {
+        'Critical': 'bg-red-600 text-white',
+        'High': 'bg-orange-500 text-white',
+        'Medium': 'bg-yellow-500 text-gray-800',
+        'Low': 'bg-green-500 text-white'
+      };
+      return colors[urgency] || 'bg-gray-400 text-white';
+    }
+
+    function getImportanceClass(importance) {
+      const classes = {
+        'Critical': 'importance-critical',
+        'High': 'importance-high'
+      };
+      return classes[importance] || '';
+    }
+
+    function getPriorityClass(importance) {
+      const classes = {
+        'Critical': 'priority-high',
+        'High': 'priority-high',
+        'Medium': 'priority-medium',
+        'Low': 'priority-low'
+      };
+      return classes[importance] || 'priority-low';
+    }
+
+    function addTask() {
+      if (state.newTask.title.trim()) {
+        const task = {
+          id: Date.now(),
+          ...state.newTask,
+          tags: state.newTask.tags ? state.newTask.tags.split(',').map(t => t.trim()) : [],
+          state: 'Active',
+          completionTimestamp: '',
+          impactScore: 5,
+          blockReason: '',
+          notes: '',
+          attachments: [],
+          linkedDocs: [],
+          webClips: [],
+          progress: 0
+        };
+        state.tasks.push(task);
+        state.showAddModal = false;
+        state.newTask = {
+          title: '',
+          parentTaskId: null,
+          status: 'Not Started',
+          dueDate: '',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '',
+          importanceLevel: 'Medium',
+          urgency: 'Medium',
+          tags: '',
+          subject: '',
+          projectLink: '',
+          recurrenceRule: ''
+        };
+        render();
+      }
+    }
+
+    function addParentTask() {
+      if (state.newColumnName.trim()) {
+        const newId = Date.now();
+        state.parentTasks.push({ id: newId, name: state.newColumnName });
+        state.newColumnName = '';
+        state.showAddColumnModal = false;
+        render();
+      }
+    }
+
+    function deleteParentTask(parentId) {
+      if (confirm('Delete this parent task and all its subtasks?')) {
+        state.parentTasks = state.parentTasks.filter(p => p.id !== parentId);
+        state.tasks = state.tasks.filter(t => t.parentTaskId !== parentId && t.id !== parentId);
+        render();
+      }
+    }
+
+    function updateParentTaskName(parentId, newName) {
+      const parent = state.parentTasks.find(p => p.id === parentId);
+      if (parent) {
+        parent.name = newName;
+        const task = state.tasks.find(t => t.id === parentId);
+        if (task) {
+          task.title = newName;
+        }
+        render();
+      }
+    }
+
+    function updateTask(id, field, value) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task[field] = value;
+        if (field === 'status' && value === 'Completed') {
+          task.completionTimestamp = new Date().toISOString();
+          task.progress = 100;
+        }
+        render();
+      }
+    }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(t => t.id !== id);
+      state.expandedTask = null;
+      render();
+    }
+
+    function toggleExpand(id) {
+      state.expandedTask = state.expandedTask === id ? null : id;
+      render();
+    }
+
+    function renderTaskCard(task) {
+      const subtasks = state.tasks.filter(t => t.parentTaskId === task.id);
+      const parentTask = task.parentTaskId ? state.tasks.find(t => t.id === task.parentTaskId) : null;
+      const isExpanded = state.expandedTask === task.id;
+      
+      return `
+        <div class="task-card bg-white rounded-lg shadow-sm p-3 mb-3 ${getPriorityClass(task.importanceLevel)} ${getImportanceClass(task.importanceLevel)}"
+             onclick="toggleExpand(${task.id})" draggable="true">
+          
+          <!-- Title -->
+          <div class="font-semibold text-gray-800 mb-2 text-sm">
+            ${state.editingTitle === task.id ? `
+              <input type="text" value="${task.title}" 
+                     onclick="event.stopPropagation()"
+                     onblur="state.editingTitle = null; render()"
+                     onchange="updateTask(${task.id}, 'title', this.value)"
+                     class="w-full border border-blue-400 rounded px-2 py-1 text-sm" autofocus />
+            ` : `
+              <span ondblclick="event.stopPropagation(); state.editingTitle = ${task.id}; render();">${task.title}</span>
+            `}
+          </div>
+
+          <!-- Card Visual Info -->
+          <div class="space-y-1 mb-2 text-xs text-gray-600">
+            ${task.dueDate ? `
+              <div class="flex items-center gap-1">
+                ${icons.calendar}
+                <span>${task.dueDate}${task.dueTime ? ' ' + task.dueTime : ''}</span>
+              </div>
+            ` : ''}
+            ${task.timeEstimate ? `
+              <div class="flex items-center gap-1">
+                ${icons.clock}
+                <span>${task.timeEstimate}</span>
+              </div>
+            ` : ''}
+            ${task.importanceLevel ? `
+              <div class="flex items-center gap-1">
+                ${icons.flag}
+                <span>${task.importanceLevel}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Urgency Badge -->
+          ${task.urgency ? `
+            <span class="urgency-badge ${getUrgencyColor(task.urgency)} inline-block mb-2">
+              ${task.urgency}
+            </span>
+          ` : ''}
+
+          <!-- Progress Bar -->
+          ${task.progress > 0 ? `
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+              <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${task.progress}%"></div>
+            </div>
+          ` : ''}
+
+          <!-- Top Row (Collapsible) -->
+          ${parentTask || task.tags.length > 0 || task.subject ? `
+            <div class="border-t pt-2 mt-2 space-y-1">
+              ${parentTask ? `
+                <div class="text-xs text-gray-500 flex items-center gap-1">
+                  ${icons.folder} ${parentTask.title}
+                </div>
+              ` : ''}
+              ${task.tags.length > 0 ? `
+                <div class="flex flex-wrap gap-1">
+                  ${task.tags.map(tag => `
+                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs flex items-center gap-1">
+                      ${icons.tag} ${tag}
+                    </span>
+                  `).join('')}
+                </div>
+              ` : ''}
+              ${task.subject ? `
+                <div class="text-xs text-gray-600 font-medium">
+                  ${task.subject}
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
+          <!-- Status Badge -->
+          <div class="mt-2 text-xs">
+            <span class="px-2 py-1 rounded ${
+              task.status === 'Completed' ? 'bg-green-100 text-green-700' :
+              task.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+              task.status === 'On Hold' ? 'bg-yellow-100 text-yellow-700' :
+              'bg-gray-100 text-gray-700'
+            }">
+              ${task.status}
+            </span>
+          </div>
+        </div>
+
+        <!-- Expanded Modal -->
+        ${isExpanded ? `
+          <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+               onclick="toggleExpand(${task.id})">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+                 onclick="event.stopPropagation()">
+              
+              <!-- Header -->
+              <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <input type="text" value="${task.title}"
+                       onchange="updateTask(${task.id}, 'title', this.value)"
+                       class="text-2xl font-bold flex-1 border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2" />
+                <button onclick="toggleExpand(${task.id})" class="text-gray-500 hover:text-gray-700 ml-4">
+                  ${icons.x}
+                </button>
+              </div>
+
+              <!-- Content -->
+              <div class="p-6 space-y-6">
+                
+                <!-- Primary Info Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select value="${task.status}" onchange="updateTask(${task.id}, 'status', this.value)"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                      <option value="On Hold">On Hold</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select value="${task.state}" onchange="updateTask(${task.id}, 'state', this.value)"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Active">Active</option>
+                      <option value="Paused">Paused</option>
+                      <option value="Blocked">Blocked</option>
+                      <option value="Archived">Archived</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                    <input type="date" value="${task.dueDate}" onchange="updateTask(${task.id}, 'dueDate', this.value)"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Time</label>
+                    <input type="time" value="${task.dueTime}" onchange="updateTask(${task.id}, 'dueTime', this.value)"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" value="${task.startDate}" onchange="updateTask(${task.id}, 'startDate', this.value)"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Estimate</label>
+                    <input type="text" value="${task.timeEstimate}" onchange="updateTask(${task.id}, 'timeEstimate', this.value)"
+                           class="w-full border border-gray-300 rounded px-3 py-2" placeholder="e.g., 2h 30m" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Importance</label>
+                    <select value="${task.importanceLevel}" onchange="updateTask(${task.id}, 'importanceLevel', this.value)"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Critical">Critical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+                    <select value="${task.urgency}" onchange="updateTask(${task.id}, 'urgency', this.value)"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Critical">Critical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Progress</label>
+                    <div class="flex items-center gap-2">
+                      <input type="range" min="0" max="100" value="${task.progress}"
+                             oninput="updateTask(${task.id}, 'progress', parseInt(this.value))"
+                             class="flex-1" />
+                      <span class="text-sm font-medium w-12">${task.progress}%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Impact Score</label>
+                    <input type="number" min="0" max="10" value="${task.impactScore}"
+                           onchange="updateTask(${task.id}, 'impactScore', this.value)"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                </div>
+
+                <!-- Project Link -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Link</label>
+                  <input type="url" value="${task.projectLink}" onchange="updateTask(${task.id}, 'projectLink', this.value)"
+                         class="w-full border border-gray-300 rounded px-3 py-2" placeholder="https://..." />
+                </div>
+
+                <!-- Block Reason -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Block Reason / Dependency</label>
+                  <input type="text" value="${task.blockReason}" onchange="updateTask(${task.id}, 'blockReason', this.value)"
+                         class="w-full border border-gray-300 rounded px-3 py-2" placeholder="What's blocking this task?" />
+                </div>
+
+                <!-- Notes -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Markdown)</label>
+                  <textarea onchange="updateTask(${task.id}, 'notes', this.value)"
+                            class="w-full border border-gray-300 rounded px-3 py-2 h-32 font-mono text-sm"
+                            placeholder="# Notes\n\nSupports **markdown** formatting...">${task.notes}</textarea>
+                  ${task.notes ? `
+                    <div class="mt-2 p-4 bg-gray-50 rounded border markdown-content">
+                      ${parseMarkdown(task.notes)}
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- Attachments -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 text-sm">
+                    ${icons.paperclip} Drop files here or click to upload
+                  </div>
+                </div>
+
+                <!-- Completion Timestamp -->
+                ${task.completionTimestamp ? `
+                  <div class="text-sm text-gray-600">
+                    <strong>Completed:</strong> ${new Date(task.completionTimestamp).toLocaleString()}
+                  </div>
+                ` : ''}
+
+                <!-- Actions -->
+                <div class="flex gap-3 pt-4 border-t">
+                  <button onclick="deleteTask(${task.id})"
+                          class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    ${icons.trash} Delete Task
+                  </button>
+                  <button onclick="toggleExpand(${task.id})"
+                          class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function renderColumn(parent) {
+      const tasks = state.tasks.filter(t => t.parentTaskId === parent.id);
+      
+      return `
+        <div class="kanban-column bg-gray-100 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-4">
+            ${state.editingColumnId === parent.id ? `
+              <input type="text" value="${parent.name}"
+                     onblur="state.editingColumnId = null; render()"
+                     onchange="updateParentTaskName(${parent.id}, this.value)"
+                     class="font-bold text-gray-700 border border-blue-400 rounded px-2 py-1 flex-1" autofocus />
+            ` : `
+              <h2 class="font-bold text-gray-700 cursor-pointer" onclick="state.editingColumnId = ${parent.id}; render();">
+                ${parent.name}
+              </h2>
+            `}
+            <div class="flex items-center gap-2">
+              <span class="bg-gray-300 text-gray-700 px-2 py-1 rounded-full text-xs font-semibold">
+                ${tasks.length}
+              </span>
+              <button onclick="deleteParentTask(${parent.id})" 
+                      class="text-red-500 hover:text-red-700 transition-colors">
+                ${icons.trash}
+              </button>
+            </div>
+          </div>
+          
+          <button onclick="state.newTask.parentTaskId = ${parent.id}; state.showAddModal = true; render();"
+                  class="w-full mb-3 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center justify-center gap-2">
+            ${icons.plus} Add Subtask
+          </button>
+          
+          <div class="space-y-3 min-h-[200px]">
+            ${tasks.length === 0 ? `
+              <div class="text-center text-gray-400 text-sm py-8">
+                No subtasks yet
+              </div>
+            ` : tasks.map(task => renderTaskCard(task)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      initializeParentTasks();
+      
+      const html = `
+        <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 p-6">
+          <div class="max-w-[1800px] mx-auto">
+            
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+              <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-gray-800">Task Board</h1>
+                <div class="flex gap-2">
+                  <button onclick="state.showAddModal = true; render();"
+                          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                    ${icons.plus} Add Task
+                  </button>
+                  <button onclick="state.showAddColumnModal = true; render();"
+                          class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                    ${icons.plus} Add Parent Task
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kanban Board -->
+            <div class="flex gap-4 overflow-x-auto pb-4">
+              ${state.parentTasks.map(parent => renderColumn(parent)).join('')}
+              
+              <!-- Add Column Button -->
+              <div class="add-column-btn">
+                <button onclick="state.showAddColumnModal = true; render();"
+                        class="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-2">
+                  ${icons.plus} Add Parent Task
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Task Modal -->
+        ${state.showAddModal ? `
+          <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+               onclick="state.showAddModal = false; render();">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                 onclick="event.stopPropagation()">
+              <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-gray-800">Create New Task</h2>
+                <button onclick="state.showAddModal = false; render();" class="text-gray-500 hover:text-gray-700">
+                  ${icons.x}
+                </button>
+              </div>
+
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Task Title *</label>
+                  <input type="text" value="${state.newTask.title}"
+                         oninput="state.newTask.title = this.value"
+                         onkeypress="if(event.key === 'Enter') addTask()"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="Enter task title..." autofocus />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Parent Task</label>
+                    <select value="${state.newTask.parentTaskId || ''}" 
+                            onchange="state.newTask.parentTaskId = this.value ? parseInt(this.value) : null"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="">None (Top Level)</option>
+                      ${state.parentTasks.map(p => `
+                        <option value="${p.id}" ${state.newTask.parentTaskId === p.id ? 'selected' : ''}>${p.name}</option>
+                      `).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select value="${state.newTask.status}" onchange="state.newTask.status = this.value"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                      <option value="On Hold">On Hold</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                    <input type="date" value="${state.newTask.dueDate}" onchange="state.newTask.dueDate = this.value"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Time</label>
+                    <input type="time" value="${state.newTask.dueTime}" onchange="state.newTask.dueTime = this.value"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" value="${state.newTask.startDate}" onchange="state.newTask.startDate = this.value"
+                           class="w-full border border-gray-300 rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Estimate</label>
+                    <input type="text" value="${state.newTask.timeEstimate}" oninput="state.newTask.timeEstimate = this.value"
+                           class="w-full border border-gray-300 rounded px-3 py-2" placeholder="e.g., 2h 30m" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Importance</label>
+                    <select value="${state.newTask.importanceLevel}" onchange="state.newTask.importanceLevel = this.value"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Critical">Critical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+                    <select value="${state.newTask.urgency}" onchange="state.newTask.urgency = this.value"
+                            class="w-full border border-gray-300 rounded px-3 py-2">
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Critical">Critical</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
+                  <input type="text" value="${state.newTask.tags}" oninput="state.newTask.tags = this.value"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="school, homework, urgent" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Subject / Category</label>
+                  <input type="text" value="${state.newTask.subject}" oninput="state.newTask.subject = this.value"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="e.g., Mathematics, Work, Personal" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Link</label>
+                  <input type="url" value="${state.newTask.projectLink}" oninput="state.newTask.projectLink = this.value"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="https://..." />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Recurrence Rule</label>
+                  <input type="text" value="${state.newTask.recurrenceRule}" oninput="state.newTask.recurrenceRule = this.value"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="e.g., Daily, Weekly, Monthly" />
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t">
+                  <button onclick="addTask()"
+                          class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Create Task
+                  </button>
+                  <button onclick="state.showAddModal = false; render();"
+                          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Add Parent Task Modal -->
+        ${state.showAddColumnModal ? `
+          <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+               onclick="state.showAddColumnModal = false; render();">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md"
+                 onclick="event.stopPropagation()">
+              <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-gray-800">Add Parent Task</h2>
+                <button onclick="state.showAddColumnModal = false; render();" class="text-gray-500 hover:text-gray-700">
+                  ${icons.x}
+                </button>
+              </div>
+
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Parent Task Name *</label>
+                  <input type="text" value="${state.newColumnName}"
+                         oninput="state.newColumnName = this.value"
+                         onkeypress="if(event.key === 'Enter') addParentTask()"
+                         class="w-full border border-gray-300 rounded px-3 py-2"
+                         placeholder="e.g., Math Homework, Science Project..." autofocus />
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                  <button onclick="addParentTask()"
+                          class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                    Add Parent Task
+                  </button>
+                  <button onclick="state.showAddColumnModal = false; render();"
+                          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    window.addTask = addTask;
+    window.addParentTask = addParentTask;
+    window.updateTask = updateTask;
+    window.deleteTask = deleteTask;
+    window.deleteParentTask = deleteParentTask;
+    window.updateParentTaskName = updateParentTaskName;
+    window.toggleExpand = toggleExpand;
+
+    render();
+  </script>
+</body>
+</html>

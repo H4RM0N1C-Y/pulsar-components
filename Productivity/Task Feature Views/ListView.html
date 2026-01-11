@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // Icon components as SVG
+    const icons = {
+      trash: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path></svg>`,
+      chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+      chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
+      trashSmall: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`
+    };
+
+    // State management
+    let state = {
+      tasks: [
+        { 
+          id: 1, 
+          task: 'Math Homework', 
+          status: 'In Progress', 
+          priority: 'High', 
+          progress: 50,
+          projectLink: '',
+          dueDate: '2026-01-15',
+          dueTime: '14:00',
+          startDate: '2026-01-01',
+          timeEstimate: '4h',
+          importanceLevel: 'High',
+          urgency: 'High',
+          impactScore: 8,
+          state: 'Active',
+          completionTimestamp: '',
+          blockReason: '',
+          parentId: null,
+          isExpanded: true
+        },
+        { 
+          id: 2, 
+          task: 'Complete worksheet packets', 
+          status: 'In Progress', 
+          priority: 'High', 
+          progress: 30,
+          projectLink: '',
+          dueDate: '2026-01-10',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '2h',
+          importanceLevel: 'Medium',
+          urgency: 'Medium',
+          impactScore: 5,
+          state: 'Active',
+          completionTimestamp: '',
+          blockReason: '',
+          parentId: 1,
+          isExpanded: false
+        },
+        { 
+          id: 3, 
+          task: 'Study for quiz', 
+          status: 'Not Started', 
+          priority: 'Medium', 
+          progress: 0,
+          projectLink: '',
+          dueDate: '2026-01-12',
+          dueTime: '',
+          startDate: '',
+          timeEstimate: '1.5h',
+          importanceLevel: 'High',
+          urgency: 'Medium',
+          impactScore: 7,
+          state: 'Active',
+          completionTimestamp: '',
+          blockReason: '',
+          parentId: 1,
+          isExpanded: false
+        }
+      ],
+      showColumnManager: false,
+      showAddTaskModal: false,
+      showAddColumnModal: false,
+      newTaskName: '',
+      selectedParentId: null,
+      newColumnName: '',
+      newColumnType: 'text',
+      customColumns: [],
+      visibleColumns: {
+        task: true,
+        status: true,
+        priority: true,
+        progress: true,
+        projectLink: false,
+        dueDate: false,
+        dueTime: false,
+        startDate: false,
+        timeEstimate: false,
+        importanceLevel: false,
+        urgency: false,
+        impactScore: false,
+        state: false,
+        completionTimestamp: false,
+        blockReason: false
+      }
+    };
+
+    const columnDefinitions = {
+      task: { label: 'Task', type: 'text' },
+      status: { label: 'Status', type: 'select', options: ['Not Started', 'In Progress', 'Completed', 'On Hold'] },
+      priority: { label: 'Priority', type: 'select', options: ['Low', 'Medium', 'High'] },
+      progress: { label: 'Progress', type: 'progress' },
+      projectLink: { label: 'Project Link', type: 'url' },
+      dueDate: { label: 'Due Date', type: 'date' },
+      dueTime: { label: 'Due Time', type: 'time' },
+      startDate: { label: 'Start Date', type: 'date' },
+      timeEstimate: { label: 'Time Estimate', type: 'text' },
+      importanceLevel: { label: 'Importance Level', type: 'select', options: ['Low', 'Medium', 'High', 'Critical'] },
+      urgency: { label: 'Urgency', type: 'select', options: ['Low', 'Medium', 'High', 'Critical'] },
+      impactScore: { label: 'Impact Score', type: 'number' },
+      state: { label: 'State', type: 'select', options: ['Active', 'Paused', 'Blocked', 'Archived'] },
+      completionTimestamp: { label: 'Completion Timestamp', type: 'datetime' },
+      blockReason: { label: 'Block Reason / Dependency', type: 'text' }
+    };
+
+    const getColumnWidth = (column) => {
+      const widths = {
+        task: 'min-w-[280px]',
+        status: 'min-w-[160px]',
+        priority: 'min-w-[140px]',
+        progress: 'min-w-[200px]',
+        projectLink: 'min-w-[220px]',
+        dueDate: 'min-w-[160px]',
+        dueTime: 'min-w-[140px]',
+        startDate: 'min-w-[160px]',
+        timeEstimate: 'min-w-[150px]',
+        importanceLevel: 'min-w-[170px]',
+        urgency: 'min-w-[140px]',
+        impactScore: 'min-w-[140px]',
+        state: 'min-w-[140px]',
+        completionTimestamp: 'min-w-[220px]',
+        blockReason: 'min-w-[220px]'
+      };
+      return widths[column] || 'min-w-[180px]';
+    };
+
+    // Helper functions
+    function getAllColumnDefinitions() {
+      const allDefs = {...columnDefinitions};
+      state.customColumns.forEach(col => {
+        allDefs[col.id] = col;
+      });
+      return allDefs;
+    }
+
+    function hasSubtasks(taskId) {
+      return state.tasks.some(task => task.parentId === taskId);
+    }
+
+    function addTask() {
+      if (state.newTaskName.trim()) {
+        const newTaskObj = { 
+          id: Date.now(), 
+          task: state.newTaskName, 
+          status: 'Not Started',
+          priority: 'Medium',
+          progress: 0,
+          parentId: state.selectedParentId,
+          isExpanded: false
+        };
+        
+        Object.keys(columnDefinitions).forEach(key => {
+          if (!(key in newTaskObj)) {
+            newTaskObj[key] = '';
+          }
+        });
+        
+        state.customColumns.forEach(col => {
+          newTaskObj[col.id] = '';
+        });
+        
+        state.tasks.push(newTaskObj);
+        state.newTaskName = '';
+        state.selectedParentId = null;
+        state.showAddTaskModal = false;
+        render();
+      }
+    }
+
+    function updateTask(id, field, value) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task[field] = value;
+        render();
+      }
+    }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(task => task.id !== id && task.parentId !== id);
+      render();
+    }
+
+    function toggleExpand(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task.isExpanded = !task.isExpanded;
+        render();
+      }
+    }
+
+    function toggleColumn(column) {
+      state.visibleColumns[column] = !state.visibleColumns[column];
+      render();
+    }
+
+    function addCustomColumn() {
+      if (state.newColumnName.trim()) {
+        const columnId = `custom_${Date.now()}`;
+        const newColumn = {
+          id: columnId,
+          label: state.newColumnName,
+          type: state.newColumnType
+        };
+        
+        state.customColumns.push(newColumn);
+        state.visibleColumns[columnId] = true;
+        
+        state.tasks.forEach(task => {
+          task[columnId] = '';
+        });
+        
+        state.newColumnName = '';
+        state.newColumnType = 'text';
+        state.showAddColumnModal = false;
+        render();
+      }
+    }
+
+    function deleteCustomColumn(columnId) {
+      state.customColumns = state.customColumns.filter(col => col.id !== columnId);
+      delete state.visibleColumns[columnId];
+      render();
+    }
+
+    function renderCell(task, column, depth) {
+      const allDefs = getAllColumnDefinitions();
+      const def = allDefs[column];
+      const value = task[column] || '';
+
+      if (column === 'task') {
+        const hasSubs = hasSubtasks(task.id);
+        return `
+          <div class="flex items-center gap-2">
+            <div style="margin-left: ${depth * 24}px" class="flex items-center gap-2">
+              ${hasSubs ? `
+                <button onclick="toggleExpand(${task.id})" class="flex-shrink-0 hover:bg-gray-200 rounded p-1">
+                  ${task.isExpanded ? icons.chevronDown : icons.chevronRight}
+                </button>
+              ` : '<div class="w-6"></div>'}
+              <input
+                type="text"
+                value="${value}"
+                onchange="updateTask(${task.id}, '${column}', this.value)"
+                class="flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+              />
+            </div>
+          </div>
+        `;
+      }
+
+      switch (def.type) {
+        case 'text':
+        case 'url':
+          return `
+            <input
+              type="text"
+              value="${value}"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              placeholder="${def.type === 'url' ? 'https://...' : ''}"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            />
+          `;
+        case 'date':
+          return `
+            <input
+              type="date"
+              value="${value}"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            />
+          `;
+        case 'time':
+          return `
+            <input
+              type="time"
+              value="${value}"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            />
+          `;
+        case 'datetime':
+          return `
+            <input
+              type="datetime-local"
+              value="${value}"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            />
+          `;
+        case 'number':
+          return `
+            <input
+              type="number"
+              value="${value}"
+              min="0"
+              max="10"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            />
+          `;
+        case 'select':
+          return `
+            <select
+              value="${value}"
+              onchange="updateTask(${task.id}, '${column}', this.value)"
+              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
+            >
+              <option value="">-</option>
+              ${def.options.map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>
+          `;
+        case 'progress':
+          return `
+            <div class="flex items-center gap-2">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="${value}"
+                oninput="updateTask(${task.id}, '${column}', parseInt(this.value))"
+                class="flex-1 min-w-0"
+              />
+              <span class="text-sm font-medium w-10 text-right">${value}%</span>
+            </div>
+          `;
+        default:
+          return `<span class="text-sm">${value}</span>`;
+      }
+    }
+
+    function renderTaskRow(task, depth = 0) {
+      const children = state.tasks.filter(t => t.parentId === task.id);
+      const visibleCols = Object.keys(state.visibleColumns).filter(col => state.visibleColumns[col]);
+      let rows = '';
+      
+      rows += `
+        <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+          ${visibleCols.map(col => `
+            <td class="px-4 py-3 border-r border-gray-200 ${getColumnWidth(col)}">
+              ${renderCell(task, col, depth)}
+            </td>
+          `).join('')}
+          <td class="px-4 py-3 text-center">
+            <button
+              onclick="deleteTask(${task.id})"
+              class="text-red-500 hover:text-red-700 transition-colors"
+            >
+              ${icons.trash}
+            </button>
+          </td>
+        </tr>
+      `;
+
+      if (task.isExpanded && children.length > 0) {
+        children.forEach(child => {
+          rows += renderTaskRow(child, depth + 1);
+        });
+      }
+
+      return rows;
+    }
+
+    function render() {
+      const visibleCols = Object.keys(state.visibleColumns).filter(col => state.visibleColumns[col]);
+      const parentTasks = state.tasks.filter(t => !t.parentId);
+      const parentTaskOptions = state.tasks.filter(t => !t.parentId);
+
+      const html = `
+        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+          <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Task Tracker</h1>
+                <div class="flex gap-2">
+                  <button
+                    onclick="state.showAddTaskModal = true; render();"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    ${icons.plus}
+                    Add Task
+                  </button>
+                  <button
+                    onclick="state.showColumnManager = !state.showColumnManager; render();"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    ${icons.settings}
+                    Manage Columns
+                  </button>
+                </div>
+              </div>
+
+              ${state.showAddTaskModal ? `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add New Task</h2>
+                    
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Task Name
+                        </label>
+                        <input
+                          type="text"
+                          id="newTaskInput"
+                          value="${state.newTaskName}"
+                          oninput="state.newTaskName = this.value"
+                          onkeypress="if(event.key === 'Enter') addTask()"
+                          placeholder="Enter task name..."
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autofocus
+                        />
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Parent Task (Optional)
+                        </label>
+                        <select
+                          value="${state.selectedParentId || ''}"
+                          onchange="state.selectedParentId = this.value ? parseInt(this.value) : null"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">None (Top Level Task)</option>
+                          ${parentTaskOptions.map(task => `
+                            <option value="${task.id}" ${state.selectedParentId === task.id ? 'selected' : ''}>
+                              ${task.task}
+                            </option>
+                          `).join('')}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                      <button
+                        onclick="addTask()"
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Create Task
+                      </button>
+                      <button
+                        onclick="state.showAddTaskModal = false; render();"
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${state.showColumnManager ? `
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-gray-700">Visible Columns</h3>
+                    <button
+                      onclick="state.showAddColumnModal = true; render();"
+                      class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                    >
+                      ${icons.plus}
+                      Add Custom Column
+                    </button>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <h4 class="text-sm font-medium text-gray-600 mb-2">Default Columns</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                      ${Object.keys(columnDefinitions).map(col => `
+                        <label class="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            ${state.visibleColumns[col] ? 'checked' : ''}
+                            onchange="toggleColumn('${col}')"
+                            class="rounded"
+                          />
+                          <span class="text-sm">${columnDefinitions[col].label}</span>
+                        </label>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  ${state.customColumns.length > 0 ? `
+                    <div>
+                      <h4 class="text-sm font-medium text-gray-600 mb-2">Custom Columns</h4>
+                      <div class="grid grid-cols-3 gap-2">
+                        ${state.customColumns.map(col => `
+                          <div class="flex items-center gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer flex-1">
+                              <input
+                                type="checkbox"
+                                ${state.visibleColumns[col.id] ? 'checked' : ''}
+                                onchange="toggleColumn('${col.id}')"
+                                class="rounded"
+                              />
+                              <span class="text-sm">${col.label}</span>
+                            </label>
+                            <button
+                              onclick="deleteCustomColumn('${col.id}')"
+                              class="text-red-500 hover:text-red-700"
+                            >
+                              ${icons.trashSmall}
+                            </button>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+
+              ${state.showAddColumnModal ? `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add Custom Column</h2>
+                    
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Column Name
+                        </label>
+                        <input
+                          type="text"
+                          value="${state.newColumnName}"
+                          oninput="state.newColumnName = this.value"
+                          placeholder="e.g., Customer Name, Budget, etc."
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autofocus
+                        />
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                          Column Type
+                        </label>
+                        <select
+                          value="${state.newColumnType}"
+                          onchange="state.newColumnType = this.value"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="text">Text</option>
+                          <option value="number">Number</option>
+                          <option value="date">Date</option>
+                          <option value="time">Time</option>
+                          <option value="url">URL</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                      <button
+                        onclick="addCustomColumn()"
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Add Column
+                      </button>
+                      <button
+                        onclick="state.showAddColumnModal = false; render();"
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+              
+              <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                <table class="w-full border-collapse">
+                  <thead>
+                    <tr class="bg-gray-100 border-b border-gray-200">
+                      ${visibleCols.map(col => {
+                        const allDefs = getAllColumnDefinitions();
+                        return `
+                          <th class="px-4 py-3 border-r border-gray-200 text-left font-semibold text-gray-700 ${getColumnWidth(col)}">
+                            ${allDefs[col].label}
+                          </th>
+                        `;
+                      }).join('')}
+                      <th class="px-4 py-3 text-center font-semibold text-gray-700 w-20">Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    ${state.tasks.length === 0 ? `
+                      <tr>
+                        <td colspan="${visibleCols.length + 1}" class="px-4 py-8 text-center text-gray-400">
+                          No tasks yet. Add one to get started!
+                        </td>
+                      </tr>
+                    ` : parentTasks.map(task => renderTaskRow(task)).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    // Make functions globally available
+    window.addTask = addTask;
+    window.updateTask = updateTask;
+    window.deleteTask = deleteTask;
+    window.toggleExpand = toggleExpand;
+    window.toggleColumn = toggleColumn;
+    window.addCustomColumn = addCustomColumn;
+    window.deleteCustomColumn = deleteCustomColumn;
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
