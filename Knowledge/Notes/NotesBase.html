@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes Platform</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: #f8f9fa;
+  color: #1a1a1a;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-input {
+  padding: 8px 16px 8px 36px;
+  border: none;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  width: 280px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.search-input::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+.search-input:focus {
+  background: white;
+  color: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.7;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Main Container */
+.main-container {
+  display: flex;
+  height: calc(100vh - 64px);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  margin-bottom: 28px;
+}
+
+.sidebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+  position: relative;
+}
+
+.sidebar-item:hover {
+  background: #f5f5f5;
+}
+
+.sidebar-item:hover .delete-folder-btn {
+  display: block;
+}
+
+.sidebar-item.active {
+  background: #eef2ff;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.delete-folder-btn {
+  display: none;
+  position: absolute;
+  right: 8px;
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.delete-folder-btn:hover {
+  background: #fecaca;
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border-radius: 16px;
+  margin: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-item:hover {
+  background: #e0e0e0;
+}
+
+.add-folder-btn, .add-tag-btn {
+  width: 100%;
+  padding: 8px;
+  background: #f5f5f5;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.add-folder-btn:hover, .add-tag-btn:hover {
+  background: #ebebeb;
+  border-color: #999;
+}
+
+/* Notes Area */
+.notes-area {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+.notes-area.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  align-content: start;
+}
+
+.notes-area.list-view .note-card {
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Note Card */
+.note-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s;
+  overflow: hidden;
+  position: relative;
+  resize: both;
+  min-width: 280px;
+  min-height: 200px;
+}
+
+.note-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.note-card.pinned {
+  border-left: 4px solid #fbbf24;
+}
+
+.note-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.note-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+}
+
+.note-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.note-card:hover .note-actions {
+  opacity: 1;
+}
+
+.note-action-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.note-action-btn:hover {
+  background: #e0e0e0;
+}
+
+.note-action-btn.pinned {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.note-action-btn.favorited {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Toolbar */
+.note-toolbar {
+  padding: 8px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 4px;
+  padding-right: 8px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.toolbar-btn:hover {
+  background: #e8e8e8;
+}
+
+.toolbar-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+.toolbar-select {
+  padding: 6px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.toolbar-color {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Note Content */
+.note-content {
+  padding: 16px;
+  padding-left: 40px;
+  min-height: 120px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.note-content:empty:before {
+  content: attr(data-placeholder);
+  color: #999;
+}
+
+.note-content ul,
+.note-content ol {
+  margin-left: 0;
+  padding-left: 30px;
+  margin-bottom: 10px;
+}
+
+.note-content li {
+  margin-bottom: 5px;
+}
+
+.note-content a {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.note-content a:hover {
+  color: #764ba2;
+}
+
+/* Note Footer */
+.note-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.note-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: #eef2ff;
+  color: #667eea;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.file-attachment {
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-attachment:hover {
+  background: #dcfce7;
+}
+
+/* Floating Add Button */
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+
+.modal.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.form-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.file-upload {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-upload:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.file-upload-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.file-upload-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.file-input {
+  display: none;
+}
+
+.selected-file {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline {
+  background: white;
+  color: #666;
+  padding: 12px 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  background: #f5f5f5;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.empty-state-text {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.empty-state-subtext {
+  font-size: 14px;
+  color: #bbb;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📝 Notes</div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search notes...">
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" id="toggleViewBtn">
+      <span id="viewIcon">📊</span> Grid View
+    </button>
+    <button class="btn btn-secondary" id="exportBtn">📤 Export</button>
+    <button class="btn btn-secondary" id="importBtn">📥 Import</button>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Folders</div>
+      <div id="foldersList"></div>
+      <button class="add-folder-btn" id="addFolderBtn">+ Add Folder</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Quick Filters</div>
+      <div class="sidebar-item" id="pinnedFilter">
+        <span>📌 Pinned</span>
+        <span id="pinnedCount">0</span>
+      </div>
+      <div class="sidebar-item" id="favFilter">
+        <span>⭐ Favorites</span>
+        <span id="favCount">0</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Tags</div>
+      <div id="tagsList"></div>
+    </div>
+  </div>
+
+  <!-- Notes Area -->
+  <div class="notes-area list-view" id="notesArea"></div>
+</div>
+
+<!-- Floating Action Button -->
+<button class="fab" id="fabBtn">+</button>
+
+<!-- Create Note Modal -->
+<div class="modal" id="noteModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Create New Note</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-input" id="noteTitle" placeholder="Enter note title...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Content</label>
+        <textarea class="form-textarea" id="noteContent" placeholder="Start writing or paste your content here..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Folder</label>
+        <select class="form-select" id="noteFolder">
+          <option value="General">General</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags (comma separated)</label>
+        <input type="text" class="form-input" id="noteTags" placeholder="work, ideas, important...">
+      </div>
+
+      <div class="form-group">
+        <div class="form-checkbox-group">
+          <input type="checkbox" class="form-checkbox" id="notePinned">
+          <label class="form-label" for="notePinned" style="margin-bottom: 0">📌 Pin this note</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-checkbox-group">
+          <input type="checkbox" class="form-checkbox" id="noteFavorite">
+          <label class="form-label" for="noteFavorite" style="margin-bottom: 0">⭐ Add to favorites</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Attach File</label>
+        <div class="file-upload" id="fileUploadArea">
+          <div class="file-upload-icon">📎</div>
+          <div class="file-upload-text">Click to upload or drag & drop<br><small>Text, Markdown, or PDF files</small></div>
+        </div>
+        <input type="file" id="noteFile" class="file-input" accept=".txt,.md,.pdf">
+        <div id="selectedFile"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" id="cancelBtn">Cancel</button>
+      <button class="btn-primary" id="createBtn">Create Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden import file input -->
+<input type="file" id="importFile" accept=".txt,.md" multiple style="display: none">
+
+<script>
+// State
+let notes = [];
+let folders = ['General', 'Work', 'Personal', 'Ideas'];
+let currentView = 'list';
+let currentFilter = { type: 'all', value: null };
+let selectedFile = null;
+
+// Initialize
+function init() {
+  loadData();
+  setupEventListeners();
+  renderFolders();
+  renderNotes();
+  updateCounts();
+}
+
+// Load data
+function loadData() {
+  const savedNotes = localStorage.getItem('notes_data');
+  const savedFolders = localStorage.getItem('folders_data');
+  
+  if (savedNotes) {
+    try {
+      notes = JSON.parse(savedNotes);
+    } catch (e) {
+      notes = [];
+    }
+  }
+  
+  if (savedFolders) {
+    try {
+      folders = JSON.parse(savedFolders);
+    } catch (e) {
+      folders = ['General', 'Work', 'Personal', 'Ideas'];
+    }
+  }
+}
+
+// Save data
+function saveData() {
+  localStorage.setItem('notes_data', JSON.stringify(notes));
+  localStorage.setItem('folders_data', JSON.stringify(folders));
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  // FAB button
+  document.getElementById('fabBtn').addEventListener('click', openModal);
+  
+  // Modal buttons
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('createBtn').addEventListener('click', createNote);
+  
+  // Header buttons
+  document.getElementById('toggleViewBtn').addEventListener('click', toggleView);
+  document.getElementById('exportBtn').addEventListener('click', exportNotes);
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+  });
+  
+  // File upload
+  document.getElementById('fileUploadArea').addEventListener('click', () => {
+    document.getElementById('noteFile').click();
+  });
+  document.getElementById('noteFile').addEventListener('change', handleFileSelect);
+  
+  // Import
+  document.getElementById('importFile').addEventListener('change', importFiles);
+  
+  // Search
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    if (query) {
+      currentFilter = { type: 'search', value: query };
+    } else {
+      currentFilter = { type: 'all' };
+    }
+    renderNotes();
+  });
+  
+  // Add folder
+  document.getElementById('addFolderBtn').addEventListener('click', addFolder);
+  
+  // Quick filters
+  document.getElementById('pinnedFilter').addEventListener('click', () => {
+    currentFilter = { type: 'pinned' };
+    renderNotes();
+  });
+  
+  document.getElementById('favFilter').addEventListener('click', () => {
+    currentFilter = { type: 'favorite' };
+    renderNotes();
+  });
+  
+  // Drag and drop
+  setupDragDrop();
+}
+
+// Render folders
+function renderFolders() {
+  const foldersList = document.getElementById('foldersList');
+  const select = document.getElementById('noteFolder');
+  
+  const allItem = `
+    <div class="sidebar-item active" data-folder="all">
+      <span>📁 All Notes</span>
+      <span id="allCount">0</span>
+    </div>
+  `;
+  
+  const folderItems = folders.map(f => `
+    <div class="sidebar-item" data-folder="${f}">
+      <span>📁 ${f}</span>
+      <span class="folder-count" data-folder="${f}">0</span>
+      ${f !== 'General' ? `<button class="delete-folder-btn" data-folder="${f}">✕</button>` : ''}
+    </div>
+  `).join('');
+  
+  foldersList.innerHTML = allItem + folderItems;
+  
+  // Add click listeners to folders
+  foldersList.querySelectorAll('.sidebar-item').forEach(item => {
+    const folder = item.getAttribute('data-folder');
+    item.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-folder-btn')) {
+        filterByFolder(folder);
+      }
+    });
+  });
+  
+  // Add delete listeners
+  foldersList.querySelectorAll('.delete-folder-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteFolder(btn.getAttribute('data-folder'));
+    });
+  });
+  
+  // Update select options
+  select.innerHTML = folders.map(f => `<option value="${f}">${f}</option>`).join('');
+  
+  updateCounts();
+}
+
+// Render notes
+function renderNotes() {
+  const area = document.getElementById('notesArea');
+  let filteredNotes = getFilteredNotes();
+  
+  // Sort: pinned first, then by date
+  filteredNotes.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return b.id - a.id;
+  });
+  
+  if (filteredNotes.length === 0) {
+    area.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📝</div>
+        <div class="empty-state-text">No notes yet</div>
+        <div class="empty-state-subtext">Click the + button to create your first note</div>
+      </div>
+    `;
+    return;
+  }
+  
+  area.innerHTML = filteredNotes.map(note => createNoteCard(note)).join('');
+}
+
+// Get filtered notes
+function getFilteredNotes() {
+  let filtered = notes;
+  
+  if (currentFilter.type === 'folder' && currentFilter.value !== 'all') {
+    filtered = filtered.filter(n => n.folder === currentFilter.value);
+  } else if (currentFilter.type === 'tag') {
+    filtered = filtered.filter(n => n.tags.includes(currentFilter.value));
+  } else if (currentFilter.type === 'pinned') {
+    filtered = filtered.filter(n => n.pinned);
+  } else if (currentFilter.type === 'favorite') {
+    filtered = filtered.filter(n => n.favorite);
+  } else if (currentFilter.type === 'search') {
+    const q = currentFilter.value.toLowerCase();
+    filtered = filtered.filter(n => 
+      n.title.toLowerCase().includes(q) || 
+      n.content.toLowerCase().includes(q)
+    );
+  }
+  
+  return filtered;
+}
+
+// Create note card HTML
+function createNoteCard(note) {
+  const tags = note.tags.map(t => `<span class="note-tag">${t}</span>`).join('');
+  const fileAttachment = note.fileName ? `
+    <div class="file-attachment">
+      <span>📄</span>
+      <span>${note.fileName}</span>
+    </div>
+  ` : '';
+  
+  return `
+    <div class="note-card ${note.pinned ? 'pinned' : ''}" data-note-id="${note.id}">
+      <div class="note-header">
+        <div class="note-title">${note.title}</div>
+        <div class="note-actions">
+          <button class="note-action-btn ${note.pinned ? 'pinned' : ''}" onclick="togglePin(${note.id})" title="Pin">📌</button>
+          <button class="note-action-btn ${note.favorite ? 'favorited' : ''}" onclick="toggleFavorite(${note.id})" title="Favorite">⭐</button>
+          <button class="note-action-btn" onclick="deleteNote(${note.id})" title="Delete">🗑️</button>
+        </div>
+      </div>
+      
+      <div class="note-toolbar" data-note-id="${note.id}">
+        <div class="toolbar-group">
+          <select class="toolbar-select" onchange="execCommandForNote(${note.id}, 'fontName', this.value)">
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Times New Roman">Times</option>
+            <option value="Courier New">Courier</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Comic Sans MS">Comic</option>
+          </select>
+          <select class="toolbar-select" onchange="execCommandForNote(${note.id}, 'fontSize', this.value)">
+            <option value="1">Tiny</option>
+            <option value="2">Small</option>
+            <option value="3" selected>Normal</option>
+            <option value="4">Medium</option>
+            <option value="5">Large</option>
+            <option value="6">XL</option>
+            <option value="7">XXL</option>
+          </select>
+        </div>
+        
+        <div class="toolbar-group">
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'bold')" title="Bold"><b>B</b></button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'italic')" title="Italic"><i>I</i></button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'underline')" title="Underline"><u>U</u></button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'strikeThrough')" title="Strikethrough"><s>S</s></button>
+        </div>
+        
+        <div class="toolbar-group">
+          <input type="color" class="toolbar-color" onchange="execCommandForNote(${note.id}, 'foreColor', this.value)" title="Text Color">
+          <input type="color" class="toolbar-color" onchange="execCommandForNote(${note.id}, 'hiliteColor', this.value)" title="Highlight">
+        </div>
+        
+        <div class="toolbar-group">
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'justifyLeft')" title="Align Left">⬅️</button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'justifyCenter')" title="Align Center">↔️</button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'justifyRight')" title="Align Right">➡️</button>
+        </div>
+        
+        <div class="toolbar-group">
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'insertUnorderedList')" title="Bullet List">•</button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'insertOrderedList')" title="Numbered List">1.</button>
+        </div>
+        
+        <div class="toolbar-group">
+          <button class="toolbar-btn" onclick="insertLinkForNote(${note.id})" title="Insert Link">🔗</button>
+          <button class="toolbar-btn" onclick="execCommandForNote(${note.id}, 'removeFormat')" title="Clear Format">✖️</button>
+        </div>
+      </div>
+      
+      <div class="note-content" 
+           contenteditable="true" 
+           data-note-id="${note.id}"
+           data-placeholder="Start typing..."
+           oninput="updateNoteContent(${note.id}, this)">${note.content}</div>
+      
+      <div class="note-footer">
+        ${tags}
+        ${fileAttachment}
+      </div>
+    </div>
+  `;
+}
+
+// Execute formatting command for specific note
+function execCommandForNote(noteId, cmd, value = null) {
+  const editor = document.querySelector(`[data-note-id="${noteId}"].note-content`);
+  if (editor) {
+    editor.focus();
+    
+    // For better compatibility, especially with contentEditable
+    try {
+      document.execCommand('styleWithCSS', false, true);
+    } catch(e) {}
+    
+    // Special handling for hiliteColor (some browsers need backColor instead)
+    if (cmd === 'hiliteColor') {
+      try {
+        document.execCommand('hiliteColor', false, value);
+      } catch(e) {
+        document.execCommand('backColor', false, value);
+      }
+    } else {
+      document.execCommand(cmd, false, value);
+    }
+    
+    // Force update
+    updateNoteContent(noteId, editor);
+  }
+}
+
+// Insert link for specific note
+function insertLinkForNote(noteId) {
+  const editor = document.querySelector(`[data-note-id="${noteId}"].note-content`);
+  if (editor) {
+    editor.focus();
+    
+    // Get selected text
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    
+    const url = prompt('Enter URL:', 'https://');
+    if (url && url.trim() && url !== 'https://') {
+      if (selectedText) {
+        // If text is selected, make it a link
+        document.execCommand('createLink', false, url);
+      } else {
+        // If no text selected, insert the URL as both text and link
+        document.execCommand('insertHTML', false, `<a href="${url}" target="_blank">${url}</a>`);
+      }
+      updateNoteContent(noteId, editor);
+    }
+  }
+}
+
+// Update note content
+function updateNoteContent(noteId, element) {
+  const note = notes.find(n => n.id === noteId);
+  if (note) {
+    note.content = element.innerHTML;
+    saveData();
+  }
+}
+
+// Modal functions
+function openModal() {
+  document.getElementById('noteModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('noteModal').classList.remove('active');
+  clearForm();
+}
+
+function clearForm() {
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteContent').value = '';
+  document.getElementById('noteTags').value = '';
+  document.getElementById('notePinned').checked = false;
+  document.getElementById('noteFavorite').checked = false;
+  document.getElementById('noteFile').value = '';
+  document.getElementById('selectedFile').innerHTML = '';
+  selectedFile = null;
+}
+
+// Create note
+function createNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  const content = document.getElementById('noteContent').value.trim();
+  const folder = document.getElementById('noteFolder').value;
+  const tags = document.getElementById('noteTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const pinned = document.getElementById('notePinned').checked;
+  const favorite = document.getElementById('noteFavorite').checked;
+  
+  if (!title) {
+    alert('Please enter a title');
+    return;
+  }
+  
+  const note = {
+    id: Date.now(),
+    title,
+    content,
+    folder,
+    tags,
+    pinned,
+    favorite,
+    fileName: selectedFile ? selectedFile.name : null,
+    fileContent: selectedFile ? selectedFile.content : null,
+    created: new Date().toISOString()
+  };
+  
+  notes.unshift(note);
+  saveData();
+  renderNotes();
+  updateCounts();
+  closeModal();
+}
+
+// File handling
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    selectedFile = {
+      name: file.name,
+      content: event.target.result
+    };
+    
+    document.getElementById('selectedFile').innerHTML = `
+      <div class="selected-file">
+        <span>📄 ${file.name}</span>
+        <button onclick="clearSelectedFile()" style="background:none;border:none;cursor:pointer;font-size:16px">✖️</button>
+      </div>
+    `;
+    
+    // Auto-populate content for text/markdown files
+    if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+      document.getElementById('noteContent').value = event.target.result;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearSelectedFile() {
+  selectedFile = null;
+  document.getElementById('noteFile').value = '';
+  document.getElementById('selectedFile').innerHTML = '';
+}
+
+// Toggle pin
+function togglePin(noteId) {
+  const note = notes.find(n => n.id === noteId);
+  if (note) {
+    note.pinned = !note.pinned;
+    saveData();
+    renderNotes();
+    updateCounts();
+  }
+}
+
+// Toggle favorite
+function toggleFavorite(noteId) {
+  const note = notes.find(n => n.id === noteId);
+  if (note) {
+    note.favorite = !note.favorite;
+    saveData();
+    renderNotes();
+    updateCounts();
+  }
+}
+
+// Delete note
+function deleteNote(noteId) {
+  if (confirm('Delete this note?')) {
+    notes = notes.filter(n => n.id !== noteId);
+    saveData();
+    renderNotes();
+    updateCounts();
+  }
+}
+
+// Filter functions
+function filterByFolder(folder) {
+  currentFilter = { type: 'folder', value: folder };
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`[data-folder="${folder}"]`).classList.add('active');
+  renderNotes();
+}
+
+function filterByTag(tag) {
+  currentFilter = { type: 'tag', value: tag };
+  renderNotes();
+}
+
+// Add folder
+function addFolder() {
+  const name = prompt('Enter folder name:');
+  if (name && name.trim()) {
+    const folderName = name.trim();
+    if (!folders.includes(folderName)) {
+      folders.push(folderName);
+      saveData();
+      renderFolders();
+    } else {
+      alert('Folder already exists!');
+    }
+  }
+}
+
+// Delete folder
+function deleteFolder(folderName) {
+  if (confirm(`Delete folder "${folderName}"? Notes in this folder will be moved to General.`)) {
+    // Move notes to General
+    notes.forEach(note => {
+      if (note.folder === folderName) {
+        note.folder = 'General';
+      }
+    });
+    
+    // Remove folder
+    folders = folders.filter(f => f !== folderName);
+    
+    saveData();
+    renderFolders();
+    renderNotes();
+    updateCounts();
+  }
+}
+
+// Toggle view
+function toggleView() {
+  const area = document.getElementById('notesArea');
+  const btn = document.getElementById('toggleViewBtn');
+  
+  if (currentView === 'list') {
+    currentView = 'grid';
+    area.classList.remove('list-view');
+    area.classList.add('grid-view');
+    btn.innerHTML = '<span id="viewIcon">📋</span> List View';
+  } else {
+    currentView = 'list';
+    area.classList.remove('grid-view');
+    area.classList.add('list-view');
+    btn.innerHTML = '<span id="viewIcon">📊</span> Grid View';
+  }
+}
+
+// Update counts
+function updateCounts() {
+  document.getElementById('allCount').textContent = notes.length;
+  document.getElementById('pinnedCount').textContent = notes.filter(n => n.pinned).length;
+  document.getElementById('favCount').textContent = notes.filter(n => n.favorite).length;
+  
+  folders.forEach(folder => {
+    const count = notes.filter(n => n.folder === folder).length;
+    const el = document.querySelector(`.folder-count[data-folder="${folder}"]`);
+    if (el) el.textContent = count;
+  });
+  
+  renderTags();
+}
+
+// Render tags
+function renderTags() {
+  const tagsList = document.getElementById('tagsList');
+  const allTags = {};
+  
+  notes.forEach(note => {
+    note.tags.forEach(tag => {
+      allTags[tag] = (allTags[tag] || 0) + 1;
+    });
+  });
+  
+  if (Object.keys(allTags).length === 0) {
+    tagsList.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">No tags yet</div>';
+    return;
+  }
+  
+  tagsList.innerHTML = Object.entries(allTags)
+    .map(([tag, count]) => `
+      <div class="tag-item" onclick="filterByTag('${tag}')">
+        <span>${tag}</span>
+        <span style="opacity:0.6">${count}</span>
+      </div>
+    `).join('');
+}
+
+// Export notes
+function exportNotes() {
+  if (notes.length === 0) {
+    alert('No notes to export!');
+    return;
+  }
+  
+  const data = JSON.stringify(notes, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `notes_export_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Import files
+function importFiles(e) {
+  const files = Array.from(e.target.files);
+  
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const content = event.target.result;
+      const note = {
+        id: Date.now() + Math.random(),
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        content: content,
+        folder: 'General',
+        tags: ['imported'],
+        pinned: false,
+        favorite: false,
+        fileName: file.name,
+        created: new Date().toISOString()
+      };
+      notes.unshift(note);
+      saveData();
+      renderNotes();
+      updateCounts();
+    };
+    reader.readAsText(file);
+  });
+  
+  e.target.value = '';
+}
+
+// Drag and drop
+function setupDragDrop() {
+  const area = document.getElementById('notesArea');
+  
+  area.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    area.style.background = '#f0f0ff';
+  });
+  
+  area.addEventListener('dragleave', () => {
+    area.style.background = '#f8f9fa';
+  });
+  
+  area.addEventListener('drop', (e) => {
+    e.preventDefault();
+    area.style.background = '#f8f9fa';
+    
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach(file => {
+      if (file.type === 'text/plain' || file.name.endsWith('.md')) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const note = {
+            id: Date.now() + Math.random(),
+            title: file.name.replace(/\.[^/.]+$/, ''),
+            content: event.target.result,
+            folder: 'General',
+            tags: ['dropped'],
+            pinned: false,
+            favorite: false,
+            fileName: file.name,
+            created: new Date().toISOString()
+          };
+          notes.unshift(note);
+          saveData();
+          renderNotes();
+          updateCounts();
+        };
+        reader.readAsText(file);
+      }
+    });
+  });
+}
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

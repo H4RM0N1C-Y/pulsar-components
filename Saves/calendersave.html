@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Timeline Task Planner</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .no-select { user-select: none; }
+  .timeline-container { overflow: hidden; position: relative; }
+  .timeline-inner { display: flex; position: absolute; height: 100%; cursor: grab; }
+  .timeline-inner.dragging { cursor: grabbing; transition: none; }
+  .day-header { height: 100%; border-right: 1px solid #404040; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; background-color: #191919; color: #9b9b9b; }
+  .day-header.highlighted { background-color: #2a2a2a; }
+  .day-header.today { background-color: #2d2d2d; font-weight: 600; color: #e0e0e0; }
+</style>
+</head>
+<body class="bg-[#191919]">
+
+<div class="max-w-7xl mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4 text-[#e0e0e0]">Timeline Task Planner</h1>
+
+  <div class="bg-[#1e1e1e] border border-[#2d2d2d] rounded overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="flex border-b border-[#404040]">
+      <div class="w-64 h-12 flex items-center px-3 font-semibold bg-[#1a1a1a] border-r border-[#404040] text-[#9b9b9b]">
+        <span class="flex-1">Tasks</span>
+        <button id="addTaskBtn" class="w-6 h-6 bg-[#2d2d2d] text-[#9b9b9b] rounded flex items-center justify-center hover:bg-[#3a3a3a] hover:text-[#e0e0e0]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="flex-1 h-12 relative timeline-container">
+        <div id="dayHeader" class="timeline-inner no-select"></div>
+      </div>
+    </div>
+
+    <!-- ROWS -->
+    <div class="timeline-body flex flex-col overflow-hidden"></div>
+
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div id="taskModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center">
+  <div class="bg-[#1e1e1e] rounded-lg p-6 w-96 relative border border-[#2d2d2d]">
+    <h2 class="text-lg font-semibold mb-4 text-[#e0e0e0]">Add New Task</h2>
+    <div class="space-y-3">
+      <input id="taskName" type="text" placeholder="Task Name" class="border border-[#2d2d2d] p-2 rounded w-full bg-[#191919] text-[#e0e0e0] placeholder-[#6b6b6b]">
+      <div>
+        <label class="block text-sm font-medium mb-1 text-[#9b9b9b]">Color</label>
+        <div class="grid grid-cols-6 gap-2">
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #ef4444;" data-color="#ef4444"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #f97316;" data-color="#f97316"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #eab308;" data-color="#eab308"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #22c55e;" data-color="#22c55e"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #06b6d4;" data-color="#06b6d4"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #3b82f6;" data-color="#3b82f6"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #8b5cf6;" data-color="#8b5cf6"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #ec4899;" data-color="#ec4899"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #f43f5e;" data-color="#f43f5e"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #14b8a6;" data-color="#14b8a6"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #84cc16;" data-color="#84cc16"></button>
+          <button class="color-option w-10 h-10 rounded border-2 border-transparent hover:border-[#9b9b9b]" style="background-color: #6366f1;" data-color="#6366f1"></button>
+        </div>
+        <input id="taskColor" type="hidden" value="#3b82f6">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1 text-[#9b9b9b]">Start Date</label>
+        <input id="taskStartDate" type="date" class="border border-[#2d2d2d] p-2 rounded w-full bg-[#191919] text-[#e0e0e0]">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1 text-[#9b9b9b]">Due Date</label>
+        <input id="taskEndDate" type="date" class="border border-[#2d2d2d] p-2 rounded w-full bg-[#191919] text-[#e0e0e0]">
+      </div>
+      <label class="flex items-center space-x-2">
+        <input id="taskRecurring" type="checkbox" class="w-4 h-4">
+        <span class="text-sm text-[#9b9b9b]">Recurring</span>
+      </label>
+    </div>
+    <div class="mt-4 flex justify-end space-x-2">
+      <button id="cancelTask" class="px-4 py-2 bg-[#2d2d2d] text-[#9b9b9b] rounded hover:bg-[#3a3a3a]">Cancel</button>
+      <button id="createBtn" class="px-4 py-2 bg-[#e0e0e0] text-[#191919] rounded hover:bg-white disabled:opacity-50" disabled>Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- TASK DETAIL MODAL -->
+<div id="taskDetailModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center">
+  <div class="bg-gray-800 rounded-lg w-3/4 h-3/4 relative flex border border-gray-700">
+    <button id="closeDetailModal" class="absolute top-4 right-4 w-8 h-8 bg-gray-700 rounded hover:bg-gray-600 flex items-center justify-center z-10">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    
+    <!-- Left Section - Add Subtask -->
+    <div class="w-80 border-r border-gray-700 p-6 overflow-y-auto">
+      <h2 class="text-lg font-semibold mb-4 text-white">Add Subtask</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Subtask Name</label>
+          <input id="detailTaskName" type="text" placeholder="Subtask Name" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Start Date</label>
+          <input id="detailTaskStartDate" type="date" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Due Date</label>
+          <input id="detailTaskEndDate" type="date" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+        </div>
+        
+        <button id="createSubtaskBtn" class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50" disabled>Add Subtask</button>
+      </div>
+    </div>
+    
+    <!-- Right Section - Extra Parameters -->
+    <div class="flex-1 p-6 overflow-y-auto">
+      <h2 class="text-lg font-semibold mb-4 text-white">Task Details</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Color</label>
+          <input id="detailTaskColor" type="color" value="#3b82f6" class="w-full h-10 p-0 border-0 rounded">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Project Link (Optional)</label>
+          <input id="detailProjectLink" type="url" placeholder="https://..." class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Importance Level</label>
+          <select id="detailImportance" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+            <option value="">Select</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Urgency (Derived)</label>
+          <input id="detailUrgency" type="text" class="border border-gray-600 p-2 rounded w-full bg-gray-900 text-gray-400" readonly placeholder="Auto-calculated">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">State</label>
+          <select id="detailState" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </div>
+        
+        <div id="completionTimestampDiv" class="hidden">
+          <label class="block text-sm font-medium mb-1 text-gray-300">Completion Timestamp</label>
+          <input id="detailCompletionTimestamp" type="text" class="border border-gray-600 p-2 rounded w-full bg-gray-900 text-gray-400" readonly>
+        </div>
+        
+        <div id="blockReasonDiv" class="hidden">
+          <label class="block text-sm font-medium mb-1 text-gray-300">Block Reason / Dependency</label>
+          <textarea id="detailBlockReason" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400" rows="3" placeholder="Why is this blocked?"></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Notes / Description (Markdown)</label>
+          <textarea id="detailNotes" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400" rows="4" placeholder="# Notes
+- Add markdown here..."></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Attachments</label>
+          <input id="detailAttachments" type="file" multiple class="border border-gray-600 p-2 rounded w-full text-sm bg-gray-700 text-gray-300">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Linked Docs / Pages</label>
+          <input id="detailLinkedDocs" type="text" placeholder="Comma-separated URLs" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Web Clips</label>
+          <input id="detailWebClips" type="url" placeholder="https://..." class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-300">Handwriting Input</label>
+          <canvas id="detailHandwriting" class="border border-gray-600 rounded w-full cursor-crosshair bg-gray-900" width="500" height="150" style="touch-action: none;"></canvas>
+          <button id="clearHandwriting" class="mt-1 text-xs text-gray-400 hover:text-gray-300">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBTASK DETAIL MODAL -->
+<div id="subtaskDetailModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center">
+  <div class="bg-gray-800 rounded-lg w-3/4 h-3/4 relative p-6 overflow-y-auto border border-gray-700">
+    <button id="closeSubtaskDetailModal" class="absolute top-4 right-4 w-8 h-8 bg-gray-700 rounded hover:bg-gray-600 flex items-center justify-center z-10">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    
+    <h2 class="text-lg font-semibold mb-4 text-white">Subtask Details</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Color</label>
+        <input id="subDetailColor" type="color" value="#2563eb" class="w-full h-10 p-0 border-0 rounded">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Project Link (Optional)</label>
+        <input id="subDetailProjectLink" type="url" placeholder="https://..." class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Importance Level</label>
+        <select id="subDetailImportance" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+          <option value="">Select</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Urgency (Derived)</label>
+        <input id="subDetailUrgency" type="text" class="border border-gray-600 p-2 rounded w-full bg-gray-900 text-gray-400" readonly placeholder="Auto-calculated">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">State</label>
+        <select id="subDetailState" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white">
+          <option value="not-started">Not Started</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="blocked">Blocked</option>
+        </select>
+      </div>
+      
+      <div id="subCompletionTimestampDiv" class="hidden">
+        <label class="block text-sm font-medium mb-1 text-gray-300">Completion Timestamp</label>
+        <input id="subDetailCompletionTimestamp" type="text" class="border border-gray-600 p-2 rounded w-full bg-gray-900 text-gray-400" readonly>
+      </div>
+      
+      <div id="subBlockReasonDiv" class="hidden">
+        <label class="block text-sm font-medium mb-1 text-gray-300">Block Reason / Dependency</label>
+        <textarea id="subDetailBlockReason" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400" rows="3" placeholder="Why is this blocked?"></textarea>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Notes / Description (Markdown)</label>
+        <textarea id="subDetailNotes" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400" rows="4" placeholder="# Notes
+- Add markdown here..."></textarea>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Attachments</label>
+        <input id="subDetailAttachments" type="file" multiple class="border border-gray-600 p-2 rounded w-full text-sm bg-gray-700 text-gray-300">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Linked Docs / Pages</label>
+        <input id="subDetailLinkedDocs" type="text" placeholder="Comma-separated URLs" class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Web Clips</label>
+        <input id="subDetailWebClips" type="url" placeholder="https://..." class="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-300">Handwriting Input</label>
+        <canvas id="subDetailHandwriting" class="border border-gray-600 rounded w-full cursor-crosshair bg-gray-900" width="700" height="150" style="touch-action: none;"></canvas>
+        <button id="clearSubHandwriting" class="mt-1 text-xs text-gray-400 hover:text-gray-300">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const totalDays = 60;
+const visibleDays = 7;
+const dayWidth = 110;
+const firstTimelineDate = new Date("2026-01-01");
+let tasks = [
+  { name: "Science Project", type: "parent", color: "#3b82f6", start: 2, duration: 4, subtasks: [
+    {name: "Research", start: 0, duration: 2, color: "#2563eb"},
+    {name: "Write Report", start: 2, duration: 1, color: "#1d4ed8"},
+    {name: "Create Poster", start: 3, duration: 1, color: "#1e40af"}
+  ]},
+  { name: "Math HW", type: "regular", color: "#8b5cf6", start: 3, duration: 2 },
+  { name: "ELA Essay", type: "parent", color: "#22c55e", start: 0, duration: 5, subtasks: [
+    {name: "Find Sources", start: 0, duration: 2, color: "#16a34a"},
+    {name: "Write Report", start: 2, duration: 3, color: "#15803d"}
+  ]}
+];
+
+const dayHeader = document.getElementById("dayHeader");
+const timelineBody = document.querySelector(".timeline-body");
+const modalInputs = document.querySelectorAll("#taskModal input[type='text'], #taskModal input[type='date']");
+
+document.querySelectorAll('.color-option').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const color = this.getAttribute('data-color');
+    document.getElementById('taskColor').value = color;
+    document.querySelectorAll('.color-option').forEach(b => b.classList.remove('ring-2', 'ring-[#e0e0e0]'));
+    this.classList.add('ring-2', 'ring-[#e0e0e0]');
+  });
+});
+
+function darkenColor(hex, percent) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, Math.floor((num >> 16) * (1 - percent)));
+  const g = Math.max(0, Math.floor(((num >> 8) & 0x00FF) * (1 - percent)));
+  const b = Math.max(0, Math.floor((num & 0x0000FF) * (1 - percent)));
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+function formatDate(date){
+  return date.toLocaleDateString("en-US",{month:"short",day:"2-digit",year:"numeric"});
+}
+
+function generateDays(){
+  dayHeader.innerHTML = "";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for(let i=0;i<totalDays;i++){
+    const date = new Date(firstTimelineDate);
+    date.setDate(date.getDate() + i);
+
+    const div = document.createElement("div");
+    div.style.width = dayWidth+"px";
+    div.className = "day-header flex flex-col justify-center items-center";
+    
+    const dateOnly = new Date(date);
+    dateOnly.setHours(0, 0, 0, 0);
+    if(dateOnly.getTime() === today.getTime()) {
+      div.classList.add("today");
+    }
+
+    const yearDiv = document.createElement("div");
+    yearDiv.textContent = date.getFullYear();
+    yearDiv.className = "text-[#6b6b6b] text-xs";
+
+    const monthDayDiv = document.createElement("div");
+    monthDayDiv.textContent = date.toLocaleDateString("en-US",{month:"short",day:"2-digit"});
+    monthDayDiv.className = "text-sm font-semibold text-[#9b9b9b]";
+
+    div.appendChild(yearDiv);
+    div.appendChild(monthDayDiv);
+
+    dayHeader.appendChild(div);
+  }
+}
+generateDays();
+
+function renderTasks(){
+  timelineBody.innerHTML = "";
+  tasks.forEach(task=>{
+    const row = document.createElement("div");
+    row.className = "flex border-b border-[#404040]";
+
+    const left = document.createElement("div");
+    left.className = `w-64 border-r border-[#404040]`;
+    left.style.backgroundColor = "#1a1a1a";
+    
+    if(task.subtasks && task.subtasks.length > 0){
+      const parentTitle = document.createElement("div");
+      parentTitle.className = "font-semibold border-b border-[#404040] flex items-center cursor-pointer hover:bg-[#252525] text-[#e0e0e0]";
+      parentTitle.style.height = "50px";
+      parentTitle.style.borderLeft = `3px solid ${task.color}`;
+      parentTitle.style.paddingLeft = "12px";
+      
+      const taskNameSpan = document.createElement("span");
+      taskNameSpan.textContent = task.name;
+      parentTitle.appendChild(taskNameSpan);
+      
+      parentTitle.addEventListener("click", ()=>openTaskDetail(task));
+      left.appendChild(parentTitle);
+      
+      task.subtasks.forEach((st, idx)=>{
+        const subRow = document.createElement("div");
+        subRow.className = "pl-6 border-b border-[#404040] last:border-b-0 text-sm flex items-center cursor-pointer hover:bg-[#252525] text-[#9b9b9b]";
+        subRow.style.height = "40px";
+        subRow.style.borderLeft = `3px solid ${st.color || task.color}`;
+        subRow.style.paddingLeft = "12px";
+        subRow.textContent = st.name;
+        subRow.addEventListener("click", ()=>openSubtaskDetail(task, idx));
+        left.appendChild(subRow);
+      });
+    } else {
+      const title = document.createElement("div");
+      title.className = "font-semibold flex items-center cursor-pointer hover:bg-[#252525] text-[#e0e0e0]";
+      title.style.height = "50px";
+      title.style.borderLeft = `3px solid ${task.color}`;
+      title.style.paddingLeft = "12px";
+      title.textContent = task.name;
+      title.addEventListener("click", ()=>openTaskDetail(task));
+      left.appendChild(title);
+    }
+    row.appendChild(left);
+
+    const right = document.createElement("div");
+    right.className = `flex-1 relative`;
+    right.style.backgroundColor = "#1a1a1a";
+    right.style.overflow="hidden";
+
+    const dayGrid = document.createElement("div");
+    dayGrid.className="absolute inset-0 flex pointer-events-none";
+    dayGrid.style.width = totalDays*dayWidth + "px";
+    
+    const todayCalc = new Date();
+    todayCalc.setHours(0, 0, 0, 0);
+    
+    for(let i=0;i<totalDays;i++){
+      const date = new Date(firstTimelineDate);
+      date.setDate(date.getDate() + i);
+      const dateOnly = new Date(date);
+      dateOnly.setHours(0, 0, 0, 0);
+      
+      const div = document.createElement("div");
+      div.style.width = dayWidth+"px";
+      div.style.height = "100%";
+      div.className="border-r border-[#404040]";
+      
+      if(dateOnly.getTime() === todayCalc.getTime()) {
+        div.style.backgroundColor = "#2d2d2d";
+      }
+      
+      dayGrid.appendChild(div);
+    }
+    right.appendChild(dayGrid);
+
+    if(task.subtasks && task.subtasks.length > 0){
+      const bigParentDiv = document.createElement("div");
+      bigParentDiv.className = `absolute top-0 bottom-0`;
+      bigParentDiv.style.backgroundColor = task.color;
+      bigParentDiv.style.left = (task.start*dayWidth)+"px";
+      bigParentDiv.style.width = (task.duration*dayWidth) + "px";
+      
+      const parentContainer = document.createElement("div");
+      parentContainer.className = "relative w-full h-full flex flex-col";
+      
+      const parentBlockRow = document.createElement("div");
+      parentBlockRow.className = "relative border-b";
+      parentBlockRow.style.borderColor = task.color + "80";
+      parentBlockRow.style.height = "50px";
+      parentContainer.appendChild(parentBlockRow);
+      
+      task.subtasks.forEach((st, idx)=>{
+        const subtaskRow = document.createElement("div");
+        subtaskRow.className = `relative ${idx < task.subtasks.length - 1 ? 'border-b' : ''}`;
+        subtaskRow.style.borderColor = task.color + "80";
+        subtaskRow.style.height = "40px";
+        
+        const subtaskBlock = document.createElement("div");
+        subtaskBlock.className = "absolute rounded m-1";
+        subtaskBlock.style.backgroundColor = st.color || task.color;
+        subtaskBlock.style.left = (st.start * dayWidth) + "px";
+        subtaskBlock.style.width = (st.duration * dayWidth - 8) + "px";
+        subtaskBlock.style.top = "4px";
+        subtaskBlock.style.bottom = "4px";
+        
+        subtaskRow.appendChild(subtaskBlock);
+        parentContainer.appendChild(subtaskRow);
+      });
+      
+      bigParentDiv.appendChild(parentContainer);
+      right.appendChild(bigParentDiv);
+    } else {
+      const block = document.createElement("div");
+      block.className=`absolute top-0 bottom-0 text-white text-sm px-3 py-2`;
+      block.style.backgroundColor = task.color;
+      block.style.left = (task.start*dayWidth)+"px";
+      block.style.width = (task.duration*dayWidth) + "px";
+      right.appendChild(block);
+    }
+    
+    let todayIndex = -1;
+    for(let i=0;i<totalDays;i++){
+      const date = new Date(firstTimelineDate);
+      date.setDate(date.getDate() + i);
+      const dateOnly = new Date(date);
+      dateOnly.setHours(0, 0, 0, 0);
+      
+      if(dateOnly.getTime() === todayCalc.getTime()) {
+        todayIndex = i;
+        break;
+      }
+    }
+    
+    const taskEnd = task.start + task.duration;
+    
+    if(todayIndex >= task.start && todayIndex < taskEnd) {
+      const todayOverlay = document.createElement("div");
+      todayOverlay.className = "absolute top-0 bottom-0 pointer-events-none";
+      todayOverlay.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+      todayOverlay.style.width = dayWidth + "px";
+      todayOverlay.style.left = (todayIndex * dayWidth) + "px";
+      right.appendChild(todayOverlay);
+    }
+
+    row.appendChild(right);
+    timelineBody.appendChild(row);
+  });
+}
+renderTasks();
+
+const modal = document.getElementById("taskModal");
+const addBtn = document.getElementById("addTaskBtn");
+const cancelBtn = document.getElementById("cancelTask");
+const createBtn = document.getElementById("createBtn");
+const taskDetailModal = document.getElementById("taskDetailModal");
+const closeDetailBtn = document.getElementById("closeDetailModal");
+const createSubtaskBtn = document.getElementById("createSubtaskBtn");
+const detailTaskName = document.getElementById("detailTaskName");
+const detailTaskStartDate = document.getElementById("detailTaskStartDate");
+const detailTaskEndDate = document.getElementById("detailTaskEndDate");
+const detailState = document.getElementById("detailState");
+const detailImportance = document.getElementById("detailImportance");
+const detailUrgency = document.getElementById("detailUrgency");
+
+const subtaskDetailModal = document.getElementById("subtaskDetailModal");
+const closeSubtaskDetailBtn = document.getElementById("closeSubtaskDetailModal");
+const subDetailState = document.getElementById("subDetailState");
+const subDetailImportance = document.getElementById("subDetailImportance");
+const subDetailUrgency = document.getElementById("subDetailUrgency");
+
+let currentTask = null;
+let currentSubtask = null;
+let currentSubtaskIndex = null;
+
+const canvas = document.getElementById("detailHandwriting");
+const ctx = canvas.getContext("2d");
+let isDrawing = false;
+
+canvas.addEventListener("mousedown", (e) => {
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if(!isDrawing) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.stroke();
+});
+
+canvas.addEventListener("mouseup", () => isDrawing = false);
+canvas.addEventListener("mouseleave", () => isDrawing = false);
+
+document.getElementById("clearHandwriting").addEventListener("click", () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+const subCanvas = document.getElementById("subDetailHandwriting");
+const subCtx = subCanvas.getContext("2d");
+let isSubDrawing = false;
+
+subCanvas.addEventListener("mousedown", (e) => {
+  isSubDrawing = true;
+  const rect = subCanvas.getBoundingClientRect();
+  subCtx.beginPath();
+  subCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+});
+
+subCanvas.addEventListener("mousemove", (e) => {
+  if(!isSubDrawing) return;
+  const rect = subCanvas.getBoundingClientRect();
+  subCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  subCtx.stroke();
+});
+
+subCanvas.addEventListener("mouseup", () => isSubDrawing = false);
+subCanvas.addEventListener("mouseleave", () => isSubDrawing = false);
+
+document.getElementById("clearSubHandwriting").addEventListener("click", () => {
+  subCtx.clearRect(0, 0, subCanvas.width, subCanvas.height);
+});
+
+detailState.addEventListener("change", function() {
+  const completionDiv = document.getElementById("completionTimestampDiv");
+  const blockReasonDiv = document.getElementById("blockReasonDiv");
+  const completionInput = document.getElementById("detailCompletionTimestamp");
+  
+  if(this.value === "completed") {
+    completionDiv.classList.remove("hidden");
+    completionInput.value = new Date().toLocaleString();
+  } else {
+    completionDiv.classList.add("hidden");
+  }
+  
+  if(this.value === "blocked") {
+    blockReasonDiv.classList.remove("hidden");
+  } else {
+    blockReasonDiv.classList.add("hidden");
+  }
+});
+
+subDetailState.addEventListener("change", function() {
+  const completionDiv = document.getElementById("subCompletionTimestampDiv");
+  const blockReasonDiv = document.getElementById("subBlockReasonDiv");
+  const completionInput = document.getElementById("subDetailCompletionTimestamp");
+  
+  if(this.value === "completed") {
+    completionDiv.classList.remove("hidden");
+    completionInput.value = new Date().toLocaleString();
+  } else {
+    completionDiv.classList.add("hidden");
+  }
+  
+  if(this.value === "blocked") {
+    blockReasonDiv.classList.remove("hidden");
+  } else {
+    blockReasonDiv.classList.add("hidden");
+  }
+});
+
+function calculateUrgency() {
+  const dueDate = detailTaskEndDate.value;
+  const importance = detailImportance.value;
+  
+  if(!dueDate || !importance) {
+    detailUrgency.value = "";
+    return;
+  }
+  
+  const due = new Date(dueDate);
+  const now = new Date();
+  const daysUntilDue = Math.floor((due - now) / (1000 * 60 * 60 * 24));
+  
+  let urgency = "";
+  if(daysUntilDue < 0) urgency = "Overdue";
+  else if(daysUntilDue <= 1) urgency = "Urgent";
+  else if(daysUntilDue <= 3) urgency = "High";
+  else if(daysUntilDue <= 7) urgency = "Medium";
+  else urgency = "Low";
+  
+  if(importance === "critical") urgency = "Critical - " + urgency;
+  
+  detailUrgency.value = urgency;
+}
+
+detailTaskEndDate.addEventListener("change", calculateUrgency);
+detailImportance.addEventListener("change", calculateUrgency);
+
+function calculateSubUrgency() {
+  const importance = subDetailImportance.value;
+  
+  if(!currentSubtask || !importance) {
+    subDetailUrgency.value = "";
+    return;
+  }
+  
+  const parentStartDate = new Date(firstTimelineDate);
+  parentStartDate.setDate(parentStartDate.getDate() + currentTask.start);
+  const subtaskDueDate = new Date(parentStartDate);
+  subtaskDueDate.setDate(subtaskDueDate.getDate() + currentSubtask.start + currentSubtask.duration - 1);
+  
+  const now = new Date();
+  const daysUntilDue = Math.floor((subtaskDueDate - now) / (1000 * 60 * 60 * 24));
+  
+  let urgency = "";
+  if(daysUntilDue < 0) urgency = "Overdue";
+  else if(daysUntilDue <= 1) urgency = "Urgent";
+  else if(daysUntilDue <= 3) urgency = "High";
+  else if(daysUntilDue <= 7) urgency = "Medium";
+  else urgency = "Low";
+  
+  if(importance === "critical") urgency = "Critical - " + urgency;
+  
+  subDetailUrgency.value = urgency;
+}
+
+subDetailImportance.addEventListener("change", calculateSubUrgency);
+
+addBtn.addEventListener("click", ()=>modal.classList.remove("hidden"));
+cancelBtn.addEventListener("click", ()=>modal.classList.add("hidden"));
+closeDetailBtn.addEventListener("click", ()=>{
+  taskDetailModal.classList.add("hidden");
+  currentTask = null;
+  detailTaskName.value = "";
+  detailTaskStartDate.value = "";
+  detailTaskEndDate.value = "";
+  createSubtaskBtn.disabled = true;
+  document.querySelectorAll(".day-header").forEach(d => d.classList.remove("highlighted"));
+});
+
+closeSubtaskDetailBtn.addEventListener("click", ()=>{
+  subtaskDetailModal.classList.add("hidden");
+  currentTask = null;
+  currentSubtask = null;
+  currentSubtaskIndex = null;
+});
+
+function openTaskDetail(task) {
+  currentTask = task;
+  taskDetailModal.classList.remove("hidden");
+  
+  document.getElementById("detailTaskColor").value = task.color || "#3b82f6";
+  
+  const parentStartDate = new Date(firstTimelineDate);
+  parentStartDate.setDate(parentStartDate.getDate() + task.start);
+  const parentEndDate = new Date(parentStartDate);
+  parentEndDate.setDate(parentEndDate.getDate() + task.duration - 1);
+  
+  detailTaskStartDate.min = parentStartDate.toISOString().split('T')[0];
+  detailTaskStartDate.max = parentEndDate.toISOString().split('T')[0];
+  detailTaskEndDate.min = parentStartDate.toISOString().split('T')[0];
+  detailTaskEndDate.max = parentEndDate.toISOString().split('T')[0];
+  
+  const allDayHeaders = document.querySelectorAll(".day-header");
+  for(let i = task.start; i < task.start + task.duration; i++) {
+    if(allDayHeaders[i]) {
+      allDayHeaders[i].classList.add("highlighted");
+    }
+  }
+}
+
+function openSubtaskDetail(task, subtaskIndex) {
+  currentTask = task;
+  currentSubtaskIndex = subtaskIndex;
+  currentSubtask = task.subtasks[subtaskIndex];
+  subtaskDetailModal.classList.remove("hidden");
+  
+  document.getElementById("subDetailColor").value = currentSubtask.color || task.color || "#2563eb";
+  
+  calculateSubUrgency();
+}
+
+document.getElementById("detailTaskColor").addEventListener("input", function() {
+  if(currentTask) {
+    currentTask.color = this.value;
+    renderTasks();
+  }
+});
+
+document.getElementById("subDetailColor").addEventListener("input", function() {
+  if(currentTask && currentSubtaskIndex !== null && currentSubtask) {
+    currentTask.subtasks[currentSubtaskIndex].color = this.value;
+    renderTasks();
+  }
+});
+
+[detailTaskName, detailTaskStartDate, detailTaskEndDate].forEach(input => {
+  input.addEventListener("input", () => {
+    const allFilled = detailTaskName.value && detailTaskStartDate.value && detailTaskEndDate.value;
+    createSubtaskBtn.disabled = !allFilled;
+  });
+});
+
+detailTaskEndDate.addEventListener("change", function() {
+  const startDate = detailTaskStartDate.value;
+  const endDate = this.value;
+  if(startDate && endDate && endDate < startDate) {
+    this.value = startDate;
+  }
+});
+
+createSubtaskBtn.addEventListener("click", () => {
+  if(!currentTask) return;
+  
+  const name = detailTaskName.value;
+  const startDate = new Date(detailTaskStartDate.value);
+  const endDate = new Date(detailTaskEndDate.value);
+  
+  if(!name || !startDate || !endDate || endDate < startDate) return;
+  
+  const relativeStart = Math.floor((startDate - firstTimelineDate)/(1000*60*60*24)) - currentTask.start;
+  const duration = Math.floor((endDate - startDate)/(1000*60*60*24)) + 1;
+  
+  if(!currentTask.subtasks) {
+    currentTask.subtasks = [];
+    currentTask.type = "parent";
+  }
+  
+  currentTask.subtasks.push({
+    name: name,
+    start: relativeStart,
+    duration: duration,
+    color: darkenColor(currentTask.color || "#3b82f6", 0.2)
+  });
+  
+  renderTasks();
+  
+  detailTaskName.value = "";
+  detailTaskStartDate.value = "";
+  detailTaskEndDate.value = "";
+  createSubtaskBtn.disabled = true;
+  
+  taskDetailModal.classList.add("hidden");
+  currentTask = null;
+  document.querySelectorAll(".day-header").forEach(d => d.classList.remove("highlighted"));
+});
+
+modalInputs.forEach(input=>input.addEventListener("input", checkForm));
+
+document.getElementById("taskEndDate").addEventListener("change", function() {
+  const startDate = document.getElementById("taskStartDate").value;
+  const endDate = this.value;
+  if(startDate && endDate && endDate < startDate) {
+    this.value = startDate;
+  }
+  checkForm();
+});
+
+function checkForm(){
+  let allFilled = true;
+  modalInputs.forEach(input => { if(!input.value) allFilled=false; });
+  createBtn.disabled = !allFilled;
+}
+
+createBtn.addEventListener("click", ()=>{
+  const name = document.getElementById("taskName").value;
+  const color = document.getElementById("taskColor").value;
+  const startDate = new Date(document.getElementById("taskStartDate").value);
+  const endDate = new Date(document.getElementById("taskEndDate").value);
+  const recurring = document.getElementById("taskRecurring").checked;
+
+  if(!name || !startDate || !endDate || endDate < startDate) return;
+
+  const duration = Math.floor((endDate - startDate)/(1000*60*60*24)) + 1;
+  const start = Math.floor((startDate - firstTimelineDate)/(1000*60*60*24));
+  
+  const newTask = { name, type: "regular", color, start, duration, recurring };
+  tasks.push(newTask);
+
+  renderTasks();
+  modal.classList.add("hidden");
+  document.getElementById("taskName").value = "";
+  document.getElementById("taskColor").value = "#3b82f6";
+  document.getElementById("taskStartDate").value = "";
+  document.getElementById("taskEndDate").value = "";
+  document.getElementById("taskRecurring").checked = false;
+  checkForm();
+});
+
+let isDragging=false, startX, currentTranslate=0;
+dayHeader.addEventListener("mousedown", e=>{
+  isDragging=true; startX=e.pageX; dayHeader.classList.add("dragging");
+});
+document.addEventListener("mouseup", ()=>{
+  isDragging=false; dayHeader.classList.remove("dragging");
+});
+document.addEventListener("mousemove", e=>{
+  if(!isDragging) return;
+  const dx = e.pageX - startX;
+  currentTranslate += dx;
+  const maxTranslate=0;
+  const minTranslate=-(totalDays*dayWidth - visibleDays*dayWidth);
+  if(currentTranslate>maxTranslate) currentTranslate=maxTranslate;
+  if(currentTranslate<minTranslate) currentTranslate=minTranslate;
+  dayHeader.style.transform = `translateX(${currentTranslate}px)`;
+  timelineBody.querySelectorAll(".flex-1 > .absolute").forEach(inner=>{
+    inner.style.transform = `translateX(${currentTranslate}px)`;
+  });
+  startX = e.pageX;
+});
+</script>
+</body>
+</html>
