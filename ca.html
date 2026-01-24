@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulsar Word Carousel</title>
+  <style>
+    :root {
+      --layer-1: #FFD93D; --layer-2: #6DD5FA; --layer-3: #F093FB; --layer-4: #4ADE80;
+      --bg: #0f0f0f; --card: #1a1a1a; --text: #fff; --text-fade: #a0a0a0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; }
+    .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+    .row { width: 100%; height: 80px; background: var(--card); border: 2px solid rgba(255,255,255,.1); border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; }
+    .row.row-1 { border-color: var(--layer-1); } .row.row-2 { border-color: var(--layer-2); }
+    .row.row-3 { border-color: var(--layer-3); } .row.row-4 { border-color: var(--layer-4); }
+    .row.stopped { box-shadow: inset 0 0 20px rgba(255,255,255,.1); }
+    .scroll-track { display: flex; gap: 20px; animation: scroll 1s linear infinite; white-space: nowrap; padding: 0 20px; will-change: transform; }
+    .scroll-track.stopped { animation: none; }
+    @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .word { padding: 0; background: 0; border-radius: 0; color: var(--text-fade); font-weight: 500; font-size: 32px; flex-shrink: 0; transition: all .3s ease; margin: 0 16px; }
+    .word.active { color: var(--layer-1); font-weight: 700; transform: scale(1.1); }
+    .row-2 .word.active { color: var(--layer-2); } .row-3 .word.active { color: var(--layer-3); }
+    .row-4 .word.active { color: var(--layer-4); }
+    .preset-display { text-align: center; color: var(--text); font-size: 18px; font-weight: 600; margin-top: 16px; }
+    .status { text-align: center; color: var(--text-fade); font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row row-1" id="row1"></div>
+    <div class="row row-2" id="row2"></div>
+    <div class="row row-3" id="row3"></div>
+    <div class="row row-4" id="row4"></div>
+    <div class="preset-display" id="presetDisplay">Loading...</div>
+    <div class="status" id="status">Spinning...</div>
+  </div>
+
+  <script>
+    const words = {
+      row1: ['Students', 'Learners', 'Creators', 'Researchers', 'Thinkers', 'Makers', 'Teams', 'Professionals'],
+      row2: ['who', 'that', 'to', 'for'],
+      row3: ['Organize', 'Track', 'Share', 'Learn', 'Create', 'Discover', 'Connect', 'Build', 'Explore', 'Document', 'Refine', 'Collaborate', 'Organizing', 'Tracking', 'Sharing', 'Learning', 'Creating', 'Discovering', 'Connecting', 'Building', 'Exploring', 'Documenting', 'Refining', 'Collaborating'],
+      row4: ['Projects', 'Ideas', 'Solutions', 'Creations', 'Notes', 'Insights', 'Knowledge', 'Resources', 'Workflows', 'Concepts', 'Achievements', 'Growth']
+    };
+
+    const presets = [
+      { groups: 0, questions: 0, verbs: 3, objects: 7 }, { groups: 1, questions: 1, verbs: 3, objects: 6 },
+      { groups: 2, questions: 0, verbs: 4, objects: 1 }, { groups: 5, questions: 1, verbs: 6, objects: 0 },
+      { groups: 3, questions: 0, verbs: 5, objects: 5 }, { groups: 4, questions: 0, verbs: 8, objects: 6 },
+      { groups: 6, questions: 1, verbs: 1, objects: 3 }, { groups: 7, questions: 0, verbs: 0, objects: 7 },
+      { groups: 6, questions: 0, verbs: 2, objects: 2 }, { groups: 4, questions: 1, verbs: 11, objects: 10 },
+      { groups: 2, questions: 1, verbs: 5, objects: 8 }, { groups: 5, questions: 0, verbs: 4, objects: 2 },
+      { groups: 1, questions: 1, verbs: 10, objects: 11 }, { groups: 3, questions: 0, verbs: 8, objects: 5 },
+      { groups: 0, questions: 0, verbs: 6, objects: 4 }, { groups: 7, questions: 1, verbs: 7, objects: 9 }
+    ];
+
+    let rowState = {
+      row1: { track: null, scrolling: true, position: 0, targetIndex: 0, checking: false, stopped: false },
+      row2: { track: null, scrolling: true, position: 0, targetIndex: 0, checking: false, stopped: false },
+      row3: { track: null, scrolling: true, position: 0, targetIndex: 0, checking: false, stopped: false },
+      row4: { track: null, scrolling: true, position: 0, targetIndex: 0, checking: false, stopped: false }
+    };
+
+    let stoppedCount = 0;
+
+    function createScrollTrack(rowId, wordList) {
+      const row = document.getElementById(rowId);
+      const track = document.createElement('div');
+      track.className = 'scroll-track';
+      const copies = rowId === 'row2' ? 12 : 2;
+      for (let i = 0; i < copies; i++) wordList.forEach(word => {
+        const el = document.createElement('div');
+        el.className = 'word'; el.textContent = word; track.appendChild(el);
+      });
+      wordList.forEach(word => {
+        const el = document.createElement('div');
+        el.className = 'word'; el.textContent = word; track.appendChild(el);
+      });
+      row.appendChild(track); rowState[rowId].track = track;
+    }
+
+    function animateScroll() {
+      ['row1', 'row2', 'row3', 'row4'].forEach(rid => {
+        const s = rowState[rid];
+        if (s.scrolling) {
+          s.position -= 4;
+          const wc = words[rid].length, copies = { row1: 2, row2: 12, row3: 2, row4: 2 }[rid];
+          if (s.position <= -wc * copies * 200) s.position = 0;
+          s.track.style.transform = `translateX(${s.position}px)`;
+          if (s.checking) checkCenterCrossing(rid);
+        }
+      });
+      requestAnimationFrame(animateScroll);
+    }
+
+    function checkCenterCrossing(rid) {
+      const s = rowState[rid];
+      if (!s.scrolling || !s.checking) return;
+      const row = document.getElementById(rid), rect = row.getBoundingClientRect(), cx = rect.width / 2;
+      s.track.querySelectorAll('.word').forEach(el => {
+        if (el.textContent === words[rid][s.targetIndex]) {
+          const wr = el.getBoundingClientRect(), wx = wr.left - rect.left + wr.width / 2;
+          if (Math.abs(wx - cx) < 150) stopRow(rid);
+        }
+      });
+    }
+
+    function stopRow(rid) {
+      const s = rowState[rid];
+      if (s.stopped) return;
+      s.scrolling = false; s.checking = false; s.stopped = true;
+      s.track.classList.add('stopped');
+      document.getElementById(rid).classList.add('stopped');
+      const row = document.getElementById(rid), target = words[rid][s.targetIndex];
+      s.track.querySelectorAll('.word').forEach(el => {
+        if (el.textContent === target) {
+          const wr = el.getBoundingClientRect(), rr = row.getBoundingClientRect();
+          s.position += rr.width / 2 - (wr.left - rr.left + wr.width / 2);
+          s.track.style.transform = `translateX(${s.position}px)`;
+          el.classList.add('active');
+        }
+      });
+      if (++stoppedCount === 4) {
+        document.getElementById('status').textContent = 'All stopped • Waiting...';
+        setTimeout(startNewCycle, 2000);
+      }
+    }
+
+    function startNewCycle() {
+      const p = presets[Math.floor(Math.random() * 16)];
+      rowState.row1.targetIndex = p.groups; rowState.row2.targetIndex = p.questions;
+      rowState.row3.targetIndex = p.verbs; rowState.row4.targetIndex = p.objects;
+      document.getElementById('presetDisplay').textContent = `${words.row1[p.groups]} ${words.row2[p.questions]} ${words.row3[p.verbs]} ${words.row4[p.objects]}`;
+      ['row1', 'row2', 'row3', 'row4'].forEach(rid => {
+        const s = rowState[rid];
+        s.scrolling = true; s.checking = false; s.stopped = false;
+        document.getElementById(rid).classList.remove('stopped');
+        s.track.classList.remove('stopped');
+        s.track.querySelectorAll('.word').forEach(w => w.classList.remove('active'));
+      });
+      stoppedCount = 0;
+      document.getElementById('status').textContent = 'Spinning...';
+      setTimeout(() => { ['row1', 'row2', 'row3', 'row4'].forEach(rid => rowState[rid].checking = true); }, 4000);
+    }
+
+    createScrollTrack('row1', words.row1); createScrollTrack('row2', words.row2);
+    createScrollTrack('row3', words.row3); createScrollTrack('row4', words.row4);
+    animateScroll(); startNewCycle();
+  </script>
+</body>
+</html>

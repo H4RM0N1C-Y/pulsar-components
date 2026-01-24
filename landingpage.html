@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar - Transform knowledge into action. A knowledge intelligence engine that bridges the gap between knowing and doing.">
+  <title>Pulsar</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === CSS VARIABLES === */
+    :root {
+      --color-bg-primary: #0A0A0A;
+      --color-bg-secondary: #0F0F0F;
+      --color-bg-tertiary: #161616;
+      --color-bg-quaternary: #0D0D0D;
+      --color-bg-quinary: #121212;
+      --color-text-primary: #FFFFFF;
+      --color-text-secondary: rgba(255, 255, 255, 0.9);
+      --color-text-tertiary: rgba(255, 255, 255, 0.7);
+      --color-text-quaternary: rgba(255, 255, 255, 0.65);
+      --color-text-quinary: rgba(255, 255, 255, 0.5);
+      --color-border-primary: rgba(255, 255, 255, 0.08);
+      --color-border-secondary: rgba(255, 255, 255, 0.1);
+      --color-border-tertiary: rgba(255, 255, 255, 0.12);
+      --color-border-hover: rgba(255, 255, 255, 0.15);
+      --color-gradient-start: #6366F1;
+      --color-gradient-end: #8B5CF6;
+      --color-layer-1: #FFD93D;
+      --color-layer-2: #6DD5FA;
+      --color-layer-3: #F093FB;
+      --color-layer-4: #4ADE80;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      --spacing-3xl: 4rem;
+      --spacing-4xl: 5rem;
+      --spacing-5xl: 6rem;
+      --radius-sm: 0.5rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --transition-fast: 0.15s ease-out;
+      --transition-base: 0.25s ease-out;
+      --transition-slow: 0.4s ease-out;
+      --shadow-sm: 0 0.25rem 0.75rem rgba(99, 102, 241, 0.2);
+      --shadow-md: 0 0.5rem 1.5rem rgba(99, 102, 241, 0.25);
+      --shadow-lg: 0 0.75rem 2rem rgba(99, 102, 241, 0.35);
+      --shadow-xl: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.3);
+      --shadow-2xl: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+      --font-primary: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-secondary: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-size-xs: 0.8125rem;
+      --font-size-sm: 0.9375rem;
+      --font-size-md: 1.0625rem;
+      --font-size-lg: 1.375rem;
+      --font-size-xl: 1.75rem;
+      --font-size-2xl: 2.25rem;
+      --font-size-3xl: 2.75rem;
+      --font-size-4xl: 3.5rem;
+      --font-size-5xl: 4.25rem;
+      --font-size-6xl: 5.5rem;
+      --z-base: 1;
+      --z-elevated: 10;
+      --z-mobile-menu: 99;
+      --z-header: 100;
+      --z-dropdown: 999;
+    }
+
+    /* === RESET === */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { font-family: var(--font-primary); background-color: var(--color-bg-primary); color: var(--color-text-primary); line-height: 1.6; overflow-x: hidden; }
+    a { text-decoration: none; color: inherit; }
+    button { border: none; background: none; cursor: pointer; font-family: inherit; }
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* === HEADER === */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4rem;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-xl);
+      z-index: var(--z-header);
+    }
+    .header__left, .header__right { flex: 1; display: flex; align-items: center; }
+    .header__left { justify-content: flex-start; }
+    .header__right { justify-content: flex-end; gap: var(--spacing-sm); }
+    .logo {
+      font-family: var(--font-secondary);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    .logo__mark { width: 28px; height: 28px; position: relative; }
+    .logo__ring { position: absolute; inset: 0; border: 1.5px solid var(--color-gradient-start); border-radius: 50%; opacity: 0.7; }
+    .logo__core { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: var(--color-gradient-start); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 12px rgba(99, 102, 241, 0.6); }
+
+    /* === NAVIGATION === */
+    .navbar { display: flex; align-items: center; gap: var(--spacing-xs); }
+    .navbar__link {
+      font-family: var(--font-primary);
+      font-weight: 500;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+    .navbar__link:hover { background: rgba(255, 255, 255, 0.06); color: var(--color-text-secondary); }
+
+    /* === BUTTONS === */
+    .btn {
+      font-family: var(--font-primary);
+      font-weight: 500;
+      font-size: var(--font-size-xs);
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+    .btn--ghost { color: var(--color-text-secondary); border: 1px solid var(--color-border-tertiary); background: transparent; }
+    .btn--ghost:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--color-border-hover); }
+    .btn--primary {
+      background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 100%);
+      color: var(--color-text-primary);
+      font-weight: 600;
+      padding: var(--spacing-xs) 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn--primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn--primary:active { transform: translateY(0); }
+
+    /* === HAMBURGER === */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      margin-left: var(--spacing-sm);
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      transition: background var(--transition-fast);
+    }
+    .hamburger:hover { background: rgba(255, 255, 255, 0.06); }
+    .hamburger__line {
+      width: 20px;
+      height: 2px;
+      background: var(--color-text-secondary);
+      border-radius: 1px;
+      transition: all var(--transition-base);
+      transform-origin: center;
+    }
+    .hamburger.active .hamburger__line:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.active .hamburger__line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.active .hamburger__line:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* === MOBILE MENU === */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 4rem;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 10, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: var(--z-mobile-menu);
+      flex-direction: column;
+      align-items: center;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      gap: var(--spacing-sm);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity var(--transition-base), transform var(--transition-base);
+    }
+    .mobile-menu.active { display: flex; opacity: 1; transform: translateY(0); }
+    .mobile-menu__link {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      padding: var(--spacing-md) var(--spacing-xl);
+      width: 100%;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+    .mobile-menu__link:hover { background: rgba(255, 255, 255, 0.06); color: var(--color-text-primary); }
+    .mobile-menu__divider { width: 100%; max-width: 200px; height: 1px; background: var(--color-border-primary); margin: var(--spacing-md) 0; }
+    .mobile-menu .btn { width: 100%; max-width: 280px; text-align: center; padding: var(--spacing-sm) var(--spacing-xl); font-size: var(--font-size-sm); }
+
+    /* === HERO === */
+    .hero {
+      width: 100%;
+      min-height: 100vh;
+      padding-top: 7rem;
+      padding-bottom: var(--spacing-4xl);
+      background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 60%, var(--color-bg-tertiary) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero__bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .hero__grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 0%, transparent 70%);
+    }
+    .hero__glow {
+      position: absolute;
+      width: 900px;
+      height: 600px;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 40%, transparent 70%);
+      animation: heroGlow 10s ease-in-out infinite;
+    }
+    @keyframes heroGlow {
+      0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.7; transform: translateX(-50%) scale(1.05); }
+    }
+    .hero__content {
+      position: relative;
+      z-index: var(--z-base);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 52rem;
+      padding: 0 var(--spacing-xl);
+    }
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-md);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 100px;
+      font-family: var(--font-primary);
+      font-size: var(--font-size-xs);
+      font-weight: 500;
+      color: var(--color-gradient-end);
+      margin-bottom: var(--spacing-lg);
+      animation: fadeInUp 0.8s ease-out;
+    }
+    .hero__badge-dot { width: 6px; height: 6px; background: var(--color-gradient-start); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .hero__title {
+      font-family: var(--font-secondary);
+      font-size: clamp(var(--font-size-3xl), 6vw, var(--font-size-5xl));
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-lg);
+      animation: fadeInUp 0.8s ease-out 0.1s backwards;
+    }
+    .hero__title-highlight {
+      background: linear-gradient(135deg, var(--color-gradient-end) 0%, var(--color-gradient-start) 50%, var(--color-text-primary) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero__description {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-md);
+      font-weight: 400;
+      line-height: 1.75;
+      color: var(--color-text-quaternary);
+      max-width: 42rem;
+      margin-bottom: var(--spacing-xl);
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-family: var(--font-secondary);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 100%);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+      animation: fadeInUp 0.8s ease-out 0.3s backwards;
+    }
+    .hero__cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .hero__cta:active { transform: translateY(0); }
+    .hero__cta-icon { width: 18px; height: 18px; transition: transform var(--transition-fast); }
+    .hero__cta:hover .hero__cta-icon { transform: translateX(3px); }
+    .hero__image {
+      position: relative;
+      z-index: var(--z-base);
+      width: calc(100% - 4rem);
+      max-width: 72rem;
+      height: clamp(20rem, 45vw, 36rem);
+      margin-top: var(--spacing-3xl);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-secondary);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(255, 255, 255, 0.02) 100%);
+      box-shadow: var(--shadow-2xl);
+      overflow: hidden;
+      animation: fadeInUp 1s ease-out 0.4s backwards;
+    }
+    .hero__image-inner {
+      position: absolute;
+      inset: 1px;
+      border-radius: calc(var(--radius-lg) - 1px);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 30%), var(--color-bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero__image-placeholder { font-family: var(--font-secondary); font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-quinary); letter-spacing: 0.05em; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* === PILLARS SECTION (Vertical Stack with Extra Scroll Space) === */
+    .pillars { 
+      background: var(--color-bg-secondary); 
+      position: relative; 
+      /* 7 cards + 1.5 viewports for final card pause = 8.5vh total */
+      height: 850vh;
+      margin-bottom: 0;
+    }
+    .pillars__sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .pillars__header { 
+      text-align: center; 
+      padding: 0 var(--spacing-xl);
+      margin-bottom: var(--spacing-2xl);
+      position: relative;
+      z-index: 5;
+    }
+    .pillars__label { font-family: var(--font-primary); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-gradient-end); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--spacing-sm); }
+    .pillars__title { font-family: var(--font-secondary); font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); letter-spacing: -0.02em; }
+    .pillars__cards-container {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      height: 420px;
+      perspective: 1200px;
+    }
+    .pillar-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      min-height: 400px;
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border: 1px solid var(--color-border-primary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(120px) scale(0.85) rotateX(8deg);
+      transition: all 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+      pointer-events: none;
+      backface-visibility: hidden;
+      will-change: transform, opacity;
+    }
+    .pillar-card.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0) scale(1) rotateX(0deg);
+      pointer-events: auto;
+      border-color: var(--color-border-hover);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 60px rgba(99, 102, 241, 0.15);
+      z-index: 10;
+    }
+    .pillar-card.prev {
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(-120px) scale(0.85) rotateX(-8deg);
+      z-index: 1;
+    }
+    .pillar-card.next {
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(120px) scale(0.85) rotateX(8deg);
+      z-index: 1;
+    }
+    .pillar-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--pillar-color, var(--color-gradient-start)) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .pillar-card.active::before { opacity: 1; }
+    .pillar-card--corespace { --pillar-color: #6366F1; }
+    .pillar-card--knowledge { --pillar-color: #8B5CF6; }
+    .pillar-card--productivity { --pillar-color: #EC4899; }
+    .pillar-card--customization { --pillar-color: #F59E0B; }
+    .pillar-card--collaboration { --pillar-color: #10B981; }
+    .pillar-card--analytics { --pillar-color: #3B82F6; }
+    .pillar-card--extensions { --pillar-color: #EF4444; }
+    .pillar-card__number { font-family: var(--font-secondary); font-size: var(--font-size-xs); font-weight: 600; color: var(--pillar-color, var(--color-text-quinary)); opacity: 0.6; margin-bottom: var(--spacing-md); }
+    .pillar-card__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      border: 1px solid var(--color-border-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-lg);
+      color: var(--pillar-color, var(--color-text-tertiary));
+      transition: all 0.4s ease;
+    }
+    .pillar-card.active .pillar-card__icon {
+      box-shadow: 0 0 30px var(--pillar-color);
+    }
+    .pillar-card__title { font-family: var(--font-secondary); font-size: var(--font-size-xl); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); letter-spacing: -0.01em; }
+    .pillar-card__description { font-family: var(--font-primary); font-size: var(--font-size-sm); font-weight: 400; line-height: 1.7; color: var(--color-text-quaternary); flex: 1; }
+    .pillar-card__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      margin-top: var(--spacing-lg);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 100px;
+      font-family: var(--font-primary);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-text-quinary);
+      width: fit-content;
+    }
+    .pillar-card__tag-dot { width: 5px; height: 5px; background: var(--pillar-color, var(--color-text-quinary)); border-radius: 50%; }
+    .pillars__progress {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: absolute;
+      right: var(--spacing-xl);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+    }
+    .pillars__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-border-secondary);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+      padding: 0;
+      position: relative;
+    }
+    .pillars__dot:hover { 
+      background: var(--color-text-quinary); 
+      transform: scale(1.3);
+    }
+    .pillars__dot.active { 
+      background: var(--color-gradient-start); 
+      height: 32px; 
+      border-radius: 5px;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .pillars { height: 700vh; }
+      .pillars__cards-container { max-width: 320px; height: 380px; }
+      .pillar-card { min-height: 360px; padding: var(--spacing-lg); }
+      .pillars__progress { right: var(--spacing-md); }
+    }
+    @media (max-width: 500px) {
+      .pillars__cards-container { max-width: calc(100% - 3rem); }
+    }
+
+    /* === FEATURES === */
+    .features { background: var(--color-bg-tertiary); padding: var(--spacing-5xl) var(--spacing-xl); }
+    .features__header { text-align: center; max-width: 40rem; margin: 0 auto var(--spacing-4xl); }
+    .features__label { font-family: var(--font-primary); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-gradient-end); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--spacing-sm); }
+    .features__title { font-family: var(--font-secondary); font-size: var(--font-size-3xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: var(--color-text-primary); }
+    .features__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); max-width: 72rem; margin: 0 auto; }
+    .feature-card {
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid var(--color-border-primary);
+      transition: all var(--transition-base);
+      display: flex;
+      flex-direction: column;
+    }
+    .feature-card:hover { border-color: var(--color-border-hover); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); }
+    .feature-card--wide { grid-column: span 2; }
+    .feature-card__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-gradient-end);
+    }
+    .feature-card__title { font-family: var(--font-secondary); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); letter-spacing: -0.01em; }
+    .feature-card__description { font-family: var(--font-primary); font-size: var(--font-size-sm); font-weight: 400; line-height: 1.65; color: var(--color-text-quaternary); flex: 1; }
+    .feature-card__visual { margin-top: var(--spacing-lg); height: 140px; border-radius: var(--radius-md); background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%); border: 1px solid rgba(255, 255, 255, 0.04); }
+    .feature-card--wide .feature-card__content { display: flex; gap: var(--spacing-xl); align-items: center; }
+    .feature-card--wide .feature-card__text { flex: 1; }
+    .feature-card--wide .feature-card__visual { flex: 0 0 280px; margin-top: 0; height: 160px; }
+
+    /* === AUDIENCE TICKER (Horizontal Lottery) === */
+    .audience {
+      background: linear-gradient(180deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+      padding: var(--spacing-5xl) var(--spacing-xl);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .audience__container { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-2xl); width: 100%; max-width: 50rem; }
+    .audience__prefix { font-family: var(--font-secondary); font-size: clamp(var(--font-size-4xl), 8vw, var(--font-size-6xl)); font-weight: 700; color: var(--color-text-primary); letter-spacing: -0.03em; text-align: center; }
+    .audience__ticker {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border-primary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .ticker__row {
+      font-family: var(--font-primary);
+      font-size: clamp(var(--font-size-xl), 4vw, var(--font-size-3xl));
+      font-weight: 500;
+      text-align: center;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-border-primary);
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+      height: 3.5rem;
+    }
+    .ticker__row:last-child { border-bottom: none; }
+    .ticker__row--1 { color: var(--color-layer-1); }
+    .ticker__row--2 { color: var(--color-layer-2); }
+    .ticker__row--3 { color: var(--color-layer-3); }
+    .ticker__row--4 { color: var(--color-layer-4); }
+    .ticker__slot { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .ticker__reel { display: flex; flex-direction: row; position: absolute; height: 100%; white-space: nowrap; }
+    .ticker__item {
+      height: 3.5rem;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ticker__row.highlighted { background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 50%, transparent 100%); }
+    .ticker__row.highlighted::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: currentColor;
+      opacity: 0.4;
+      border-radius: 1px;
+    }
+
+    /* === VISION === */
+    .vision { background: var(--color-bg-tertiary); padding: var(--spacing-5xl) var(--spacing-xl); }
+    .vision__content { display: flex; align-items: center; gap: var(--spacing-4xl); max-width: 72rem; margin: 0 auto; }
+    .vision__visual {
+      flex: 1;
+      aspect-ratio: 4/3;
+      max-height: 400px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid var(--color-border-secondary);
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+    }
+    .vision__visual::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 40%); }
+    .vision__text { flex: 1; }
+    .vision__label { font-family: var(--font-primary); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-gradient-end); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--spacing-sm); }
+    .vision__title { font-family: var(--font-secondary); font-size: var(--font-size-4xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--color-text-primary); margin-bottom: var(--spacing-lg); }
+    .vision__description { font-family: var(--font-primary); font-size: var(--font-size-md); font-weight: 400; line-height: 1.8; color: var(--color-text-quaternary); }
+
+    /* === CTA SECTION === */
+    .cta-section {
+      background: linear-gradient(180deg, var(--color-bg-quaternary) 0%, var(--color-bg-quinary) 100%);
+      padding: var(--spacing-5xl) var(--spacing-xl);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section__bg { position: absolute; inset: 0; pointer-events: none; }
+    .cta-section__glow { position: absolute; width: 600px; height: 400px; top: 50%; left: 30%; transform: translate(-50%, -50%); background: radial-gradient(ellipse, rgba(99, 102, 241, 0.06) 0%, transparent 60%); }
+    .cta-section__content { position: relative; z-index: var(--z-base); display: flex; align-items: center; gap: var(--spacing-4xl); max-width: 72rem; margin: 0 auto; }
+    .cta-section__text { flex: 1; }
+    .cta-section__label { font-family: var(--font-primary); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-gradient-end); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--spacing-sm); }
+    .cta-section__title { font-family: var(--font-secondary); font-size: var(--font-size-4xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--color-text-primary); margin-bottom: var(--spacing-lg); }
+    .cta-section__description { font-family: var(--font-primary); font-size: var(--font-size-md); font-weight: 400; line-height: 1.8; color: var(--color-text-quaternary); margin-bottom: var(--spacing-xl); }
+    .cta-section__button {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-family: var(--font-secondary);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 100%);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+    }
+    .cta-section__button:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .cta-section__visual {
+      flex: 1;
+      aspect-ratio: 4/3;
+      max-height: 400px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid var(--color-border-secondary);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* === FOOTER === */
+    .footer { background: var(--color-bg-primary); border-top: 1px solid var(--color-border-primary); padding: var(--spacing-3xl) var(--spacing-xl); }
+    .footer__content { display: flex; justify-content: space-between; align-items: center; max-width: 72rem; margin: 0 auto; }
+    .footer__brand { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+    .footer__logo { font-family: var(--font-secondary); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); letter-spacing: -0.01em; }
+    .footer__tagline { font-family: var(--font-primary); font-size: var(--font-size-sm); color: var(--color-text-quinary); }
+    .footer__links { display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-xs); }
+    .footer__copyright { font-family: var(--font-primary); font-size: var(--font-size-sm); color: var(--color-text-quinary); }
+    .footer__email { font-family: var(--font-primary); font-size: var(--font-size-sm); color: var(--color-text-tertiary); border-bottom: 1px solid rgba(255, 255, 255, 0.2); transition: all var(--transition-fast); }
+    .footer__email:hover { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1100px) {
+      .features__grid { grid-template-columns: 1fr; gap: var(--spacing-md); }
+      .feature-card--wide { grid-column: span 1; }
+      .feature-card--wide .feature-card__content { flex-direction: column; }
+      .feature-card--wide .feature-card__visual { flex: none; width: 100%; margin-top: var(--spacing-lg); }
+    }
+    @media (max-width: 1000px) {
+      .vision__content, .cta-section__content { flex-direction: column; text-align: center; }
+      .vision__visual, .cta-section__visual { width: 100%; max-width: 500px; order: 2; }
+      .vision__text, .cta-section__text { order: 1; }
+    }
+    @media (max-width: 900px) {
+      .navbar { display: none; }
+      .hamburger { display: flex; }
+      .header__right .btn--ghost { display: none; }
+    }
+    @media (max-width: 768px) {
+      .hero { padding-top: 6rem; }
+      .hero__image { width: calc(100% - 2rem); height: clamp(16rem, 50vw, 24rem); }
+      .audience__prefix { font-size: var(--font-size-3xl); }
+      .ticker__row { font-size: var(--font-size-xl); padding: var(--spacing-sm) var(--spacing-md); height: 3rem; }
+      .ticker__item { height: 3rem; }
+      .footer__content { flex-direction: column; text-align: center; gap: var(--spacing-lg); }
+      .footer__links { align-items: center; }
+    }
+    @media (max-width: 580px) { .header__right .btn--ghost { display: none; } }
+    @media (max-width: 500px) {
+      html { font-size: 14px; }
+      .header { padding: 0 var(--spacing-md); }
+      .hero__content { padding: 0 var(--spacing-md); }
+      .hero__title { font-size: var(--font-size-2xl); }
+      .vision__title, .cta-section__title { font-size: var(--font-size-2xl); }
+      .features__title { font-size: var(--font-size-2xl); }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* === FOCUS STATES === */
+    :focus { outline: none; }
+    :focus-visible { outline: 2px solid var(--color-gradient-start); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header__left">
+      <a href="#" class="logo">
+        <div class="logo__mark" aria-hidden="true">
+          <div class="logo__ring"></div>
+          <div class="logo__core"></div>
+        </div>
+        <span>Pulsar</span>
+      </a>
+    </div>
+    <nav class="navbar">
+      <a href="#" class="navbar__link">Community</a>
+      <a href="#" class="navbar__link">Marketplace</a>
+      <a href="#" class="navbar__link">Pricing</a>
+      <a href="#" class="navbar__link">Explore</a>
+      <a href="#" class="navbar__link">Resources</a>
+    </nav>
+    <div class="header__right">
+      <button class="btn btn--ghost">Log in</button>
+      <button class="btn btn--primary">Try Pulsar free</button>
+      <button class="hamburger" aria-label="Toggle Menu" aria-expanded="false">
+        <div class="hamburger__line"></div>
+        <div class="hamburger__line"></div>
+        <div class="hamburger__line"></div>
+      </button>
+    </div>
+    <nav class="mobile-menu" aria-hidden="true">
+      <a href="#" class="mobile-menu__link">Community</a>
+      <a href="#" class="mobile-menu__link">Marketplace</a>
+      <a href="#" class="mobile-menu__link">Pricing</a>
+      <a href="#" class="mobile-menu__link">Explore</a>
+      <a href="#" class="mobile-menu__link">Resources</a>
+      <div class="mobile-menu__divider"></div>
+      <button class="btn btn--ghost">Log in</button>
+      <button class="btn btn--primary">Try Pulsar free</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero__bg" aria-hidden="true">
+        <div class="hero__grid"></div>
+        <div class="hero__glow"></div>
+      </div>
+      <div class="hero__content">
+        <div class="hero__badge">
+          <span class="hero__badge-dot"></span>
+          <span>Now in Early Access</span>
+        </div>
+        <h1 class="hero__title">Knowledge should <span class="hero__title-highlight">move</span>.</h1>
+        <p class="hero__description">Kill dead knowledge—the gap between ideas and action—and turn what you know into real results. Pulsar connects thoughts, tasks, and goals through adaptive AI. Not a notes app. A system for momentum.</p>
+        <a href="#" class="hero__cta">
+          <span>Get Started</span>
+          <svg class="hero__cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="hero__image">
+        <div class="hero__image-inner">
+          <span class="hero__image-placeholder">PRODUCT PREVIEW</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 Pillars Section -->
+    <section class="pillars" id="pillarsSection">
+      <div class="pillars__sticky">
+        <header class="pillars__header">
+          <p class="pillars__label">The Foundation</p>
+          <h2 class="pillars__title">Seven pillars. One system.</h2>
+        </header>
+        
+        <div class="pillars__cards-container" id="pillarsContainer">
+          <article class="pillar-card pillar-card--corespace active" data-index="0">
+            <span class="pillar-card__number">01</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Corespace</h3>
+            <p class="pillar-card__description">Your central hub. Everything connects here—tasks, notes, goals, and ideas converge in one unified workspace that adapts to your thinking.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Foundation</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--knowledge" data-index="1">
+            <span class="pillar-card__number">02</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Knowledge</h3>
+            <p class="pillar-card__description">Capture, connect, and resurface what matters. Your second brain that actually remembers—and helps you find connections you'd never see alone.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Learning</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--productivity" data-index="2">
+            <span class="pillar-card__number">03</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Productivity</h3>
+            <p class="pillar-card__description">Tasks that prioritize themselves. Smart focus modes, deadline awareness, and AI-driven suggestions keep you moving on what actually matters.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Execution</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--customization" data-index="3">
+            <span class="pillar-card__number">04</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Customization</h3>
+            <p class="pillar-card__description">Your workspace, your rules. Drag, drop, resize, rearrange. Build dashboards that match how your brain works—not someone else's template.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Flexibility</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--collaboration" data-index="4">
+            <span class="pillar-card__number">05</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Collaboration</h3>
+            <p class="pillar-card__description">Think together, build together. Real-time sync, shared spaces, and transparent workflows that keep teams aligned without endless meetings.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Teams</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--analytics" data-index="5">
+            <span class="pillar-card__number">06</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M20 12a8 8 0 1 1-8-8"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Analytics</h3>
+            <p class="pillar-card__description">See your patterns, understand your progress. Insights that reveal where your time goes—and where your energy should go next.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Insights</span></div>
+          </article>
+          
+          <article class="pillar-card pillar-card--extensions" data-index="6">
+            <span class="pillar-card__number">07</span>
+            <div class="pillar-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <h3 class="pillar-card__title">Extensions</h3>
+            <p class="pillar-card__description">Expand infinitely. Connect your favorite tools, build custom integrations, and extend Pulsar to fit workflows you haven't even invented yet.</p>
+            <div class="pillar-card__tag"><span class="pillar-card__tag-dot"></span><span>Ecosystem</span></div>
+          </article>
+        </div>
+
+        <div class="pillars__progress" id="pillarsDots">
+          <button class="pillars__dot active" data-index="0" aria-label="Pillar 1"></button>
+          <button class="pillars__dot" data-index="1" aria-label="Pillar 2"></button>
+          <button class="pillars__dot" data-index="2" aria-label="Pillar 3"></button>
+          <button class="pillars__dot" data-index="3" aria-label="Pillar 4"></button>
+          <button class="pillars__dot" data-index="4" aria-label="Pillar 5"></button>
+          <button class="pillars__dot" data-index="5" aria-label="Pillar 6"></button>
+          <button class="pillars__dot" data-index="6" aria-label="Pillar 7"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <header class="features__header">
+        <p class="features__label">Capabilities</p>
+        <h2 class="features__title">Built for how you actually think</h2>
+      </header>
+      <div class="features__grid">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3 class="feature-card__title">Smart Focus</h3>
+          <p class="feature-card__description">Automatically surfaces your most important tasks. No more wondering what to do next.</p>
+          <div class="feature-card__visual"></div>
+        </div>
+        <div class="feature-card feature-card--wide">
+          <div class="feature-card__content">
+            <div class="feature-card__text">
+              <div class="feature-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3 class="feature-card__title">Idea Fusion</h3>
+              <p class="feature-card__description">Connect scattered thoughts into structured action plans. Pulsar links your ideas like constellations—forming a clear path forward from chaos.</p>
+            </div>
+            <div class="feature-card__visual"></div>
+          </div>
+        </div>
+        <div class="feature-card feature-card--wide">
+          <div class="feature-card__content">
+            <div class="feature-card__text">
+              <div class="feature-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              </div>
+              <h3 class="feature-card__title">Custom Dashboard</h3>
+              <p class="feature-card__description">Build your workspace your way. A fully customizable canvas where you arrange widgets, charts, and tools exactly how you want them.</p>
+            </div>
+            <div class="feature-card__visual"></div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M20 12a8 8 0 1 1-8-8"/></svg>
+          </div>
+          <h3 class="feature-card__title">AI Insights</h3>
+          <p class="feature-card__description">Learns your patterns and suggests faster, smarter workflows. Intelligence that adapts to you.</p>
+          <div class="feature-card__visual"></div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="feature-card__title">Adaptive System</h3>
+          <p class="feature-card__description">Smooth transitions and a workspace that shapes itself around how you work. No forcing yourself into boxes.</p>
+          <div class="feature-card__visual"></div>
+        </div>
+        <div class="feature-card feature-card--wide">
+          <div class="feature-card__content">
+            <div class="feature-card__text">
+              <div class="feature-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <h3 class="feature-card__title">Knowledge Engine</h3>
+              <p class="feature-card__description">Turn scattered notes into structured plans you can act on immediately. Your second brain, organized.</p>
+            </div>
+            <div class="feature-card__visual"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audience Ticker Section -->
+    <section class="audience">
+      <div class="audience__container">
+        <h2 class="audience__prefix">Pulsar, for</h2>
+        <div class="audience__ticker" id="ticker">
+          <div class="ticker__row ticker__row--1">
+            <div class="ticker__slot"><div class="ticker__reel" id="reel1"></div></div>
+          </div>
+          <div class="ticker__row ticker__row--2">
+            <div class="ticker__slot"><div class="ticker__reel" id="reel2"></div></div>
+          </div>
+          <div class="ticker__row ticker__row--3">
+            <div class="ticker__slot"><div class="ticker__reel" id="reel3"></div></div>
+          </div>
+          <div class="ticker__row ticker__row--4">
+            <div class="ticker__slot"><div class="ticker__reel" id="reel4"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="vision">
+      <div class="vision__content">
+        <div class="vision__visual"></div>
+        <div class="vision__text">
+          <p class="vision__label">Our Vision</p>
+          <h2 class="vision__title">Ideas flow. Productivity follows.</h2>
+          <p class="vision__description">We're building a future where the gap between knowing and doing disappears. Where your workspace thinks with you, not against you. Pulsar is for builders, dreamers, and doers who refuse to let good ideas die in a notes app.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="cta-section__bg" aria-hidden="true"><div class="cta-section__glow"></div></div>
+      <div class="cta-section__content">
+        <div class="cta-section__text">
+          <p class="cta-section__label">Join the Movement</p>
+          <h2 class="cta-section__title">Ride the wave.</h2>
+          <p class="cta-section__description">A movement of builders, dreamers, and doers is rising. Whether you're curious, collaborating, or creating something new—let's connect and make it real.</p>
+          <a href="#" class="cta-section__button">
+            <span>Join the waitlist</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="cta-section__visual"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__content">
+      <div class="footer__brand">
+        <span class="footer__logo">Pulsar</span>
+        <span class="footer__tagline">Building the future of productivity.</span>
+      </div>
+      <div class="footer__links">
+        <span class="footer__copyright">© 2025 Pulsar. All rights reserved.</span>
+        <a href="mailto:hello@pulsar.ai" class="footer__email">hello@pulsar.ai</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Hamburger Menu
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    hamburger.addEventListener('click', () => {
+      const isActive = hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
+      hamburger.setAttribute('aria-expanded', isActive);
+      mobileMenu.setAttribute('aria-hidden', !isActive);
+      document.body.style.overflow = isActive ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('.mobile-menu__link, .btn').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Horizontal Lottery Ticker
+    const tickerData = [
+      { row1: 'Students', row2: 'to', row3: 'organize', row4: 'projects' },
+      { row1: 'Creators', row2: 'who', row3: 'build', row4: 'ideas' },
+      { row1: 'Researchers', row2: 'that', row3: 'connect', row4: 'knowledge' },
+      { row1: 'Founders', row2: 'ready to', row3: 'ship', row4: 'faster' },
+      { row1: 'Teams', row2: 'who', row3: 'move', row4: 'together' },
+      { row1: 'Learners', row2: 'to', row3: 'master', row4: 'anything' }
+    ];
+    const reelData = {
+      reel1: tickerData.map(d => d.row1),
+      reel2: tickerData.map(d => d.row2),
+      reel3: tickerData.map(d => d.row3),
+      reel4: tickerData.map(d => d.row4)
+    };
+    const itemWidth = 200;
+
+    // Build horizontal reels
+    Object.keys(reelData).forEach(reelId => {
+      const reel = document.getElementById(reelId);
+      const items = reelData[reelId];
+      // Create many copies for seamless looping
+      for (let loop = 0; loop < 20; loop++) {
+        items.forEach((text) => {
+          const item = document.createElement('div');
+          item.className = 'ticker__item';
+          item.textContent = text;
+          reel.appendChild(item);
+        });
+      }
+    });
+
+    let currentTickerIndex = 0;
+    let isSpinning = false;
+
+    function spinLottery() {
+      if (isSpinning) return;
+      isSpinning = true;
+      
+      const reels = ['reel1', 'reel2', 'reel3', 'reel4'];
+      const rows = document.querySelectorAll('.ticker__row');
+      const itemCount = tickerData.length;
+      const nextIndex = (currentTickerIndex + 1) % itemCount;
+      
+      // Remove highlights during spin
+      rows.forEach(row => row.classList.remove('highlighted'));
+
+      reels.forEach((reelId, reelIndex) => {
+        const reel = document.getElementById(reelId);
+        const totalItems = itemCount * 20;
+        
+        // Start position (centered on current item)
+        const startPos = (itemCount * 10 + currentTickerIndex) * itemWidth;
+        // End position (after spinning through many items, land on next)
+        const spinLoops = 8 + reelIndex; // More loops for later rows
+        const endPos = (itemCount * 10 + nextIndex + spinLoops * itemCount) * itemWidth;
+        
+        const spinDuration = 5000 + reelIndex * 400; // 5-7 seconds staggered
+        const spinStart = performance.now();
+        
+        // Set initial position
+        reel.style.transform = `translateX(${-startPos + itemWidth * 3}px)`;
+        
+        let direction = 1; // 1 = left, -1 = right
+        let lastPos = startPos;
+        
+        function animateSpin(now) {
+          const elapsed = now - spinStart;
+          const progress = Math.min(elapsed / spinDuration, 1);
+          
+          // Ease out with oscillation at the end
+          let easeProgress;
+          if (progress < 0.7) {
+            // Fast spinning phase - oscillate left/right
+            const oscillations = Math.floor(elapsed / 150);
+            direction = oscillations % 2 === 0 ? 1 : -1;
+            const spinSpeed = (1 - progress / 0.7) * 3000 + 500;
+            const phase = (elapsed % 300) / 300;
+            easeProgress = progress * 0.5 + Math.sin(phase * Math.PI * 2) * 0.1 * (1 - progress);
+          } else {
+            // Slowing down phase
+            const slowProgress = (progress - 0.7) / 0.3;
+            easeProgress = 0.5 + slowProgress * 0.5;
+            easeProgress = 0.5 + (1 - Math.pow(1 - slowProgress, 3)) * 0.5;
+            direction = 1;
+          }
+          
+          const currentPos = startPos + (endPos - startPos) * easeProgress;
+          const centerOffset = itemWidth * 3;
+          
+          reel.style.transform = `translateX(${-currentPos + centerOffset}px)`;
+          
+          if (progress < 1) {
+            requestAnimationFrame(animateSpin);
+          } else {
+            // Snap to final position
+            const finalPos = (itemCount * 10 + nextIndex) * itemWidth;
+            reel.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            reel.style.transform = `translateX(${-finalPos + centerOffset}px)`;
+            
+            setTimeout(() => {
+              reel.style.transition = 'none';
+            }, 300);
+            
+            // Add highlight after last reel stops
+            if (reelIndex === reels.length - 1) {
+              setTimeout(() => {
+                rows.forEach(row => row.classList.add('highlighted'));
+                isSpinning = false;
+              }, 400);
+            }
+          }
+        }
+        
+        reel.style.transition = 'none';
+        requestAnimationFrame(animateSpin);
+      });
+      
+      currentTickerIndex = nextIndex;
+    }
+
+    // Initial state
+    document.querySelectorAll('.ticker__row').forEach(row => row.classList.add('highlighted'));
+    // Position reels at first item
+    ['reel1', 'reel2', 'reel3', 'reel4'].forEach((reelId, i) => {
+      const reel = document.getElementById(reelId);
+      const startPos = tickerData.length * 10 * itemWidth;
+      reel.style.transform = `translateX(${-startPos + itemWidth * 3}px)`;
+    });
+
+    // Start lottery after delay, then every 12 seconds
+    setTimeout(() => {
+      spinLottery();
+      setInterval(spinLottery, 12000); // 5-7s spin + 5s pause
+    }, 2000);
+
+    // IMPROVED Scroll-Triggered Vertical Pillars with Extra Scroll Space
+    const pillarsSection = document.getElementById('pillarsSection');
+    const pillarCards = document.querySelectorAll('.pillar-card');
+    const dots = document.querySelectorAll('.pillars__dot');
+    const cardCount = pillarCards.length;
+    let currentPillarIndex = 0;
+
+    function updatePillars(index) {
+      index = Math.max(0, Math.min(index, cardCount - 1));
+      if (index === currentPillarIndex) return;
+      
+      currentPillarIndex = index;
+      
+      pillarCards.forEach((card, i) => {
+        card.classList.remove('active', 'prev', 'next');
+        if (i === index) {
+          card.classList.add('active');
+        } else if (i < index) {
+          card.classList.add('prev');
+        } else {
+          card.classList.add('next');
+        }
+      });
+      
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+    }
+
+    // Initialize
+    pillarCards.forEach((card, i) => {
+      if (i === 0) {
+        card.classList.add('active');
+      } else {
+        card.classList.add('next');
+      }
+    });
+
+    function handlePillarScroll() {
+      const sectionRect = pillarsSection.getBoundingClientRect();
+      const sectionHeight = pillarsSection.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate progress through section (0 to 1)
+      // Section is 850vh total: 7 cards (700vh) + 1.5vh extra pause (150vh)
+      const scrollProgress = -sectionRect.top / (sectionHeight - viewportHeight);
+      const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+      
+      // Map to card index with pause at the end
+      // First 7/8.5 of scroll = cards 0-6
+      // Last 1.5/8.5 of scroll = stay on card 6
+      const cardTransitionEnd = 7 / 8.5; // ~0.824
+      
+      let targetIndex;
+      if (clampedProgress <= cardTransitionEnd) {
+        // Normal progression through cards
+        const cardProgress = clampedProgress / cardTransitionEnd;
+        targetIndex = Math.round(cardProgress * (cardCount - 1));
+      } else {
+        // Stay on last card during extra scroll space
+        targetIndex = cardCount - 1;
+      }
+      
+      if (targetIndex !== currentPillarIndex) {
+        updatePillars(targetIndex);
+      }
+    }
+
+    // Dot click handlers with smooth scroll
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        const sectionTop = pillarsSection.offsetTop;
+        const sectionHeight = pillarsSection.offsetHeight;
+        const viewportHeight = window.innerHeight;
+        const scrollRange = sectionHeight - viewportHeight;
+        
+        // Calculate target scroll position
+        // Each card gets 1/8.5 of the total section height
+        const cardProgressRatio = 7 / 8.5;
+        const targetScroll = sectionTop + (index / (cardCount - 1)) * scrollRange * cardProgressRatio;
+        
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      });
+    });
+
+    // Throttled scroll handler for performance
+    let scrollTicking = false;
+    window.addEventListener('scroll', () => {
+      if (!scrollTicking) {
+        window.requestAnimationFrame(() => {
+          handlePillarScroll();
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    }, { passive: true });
+
+    // Header scroll effect
+    const header = document.querySelector('.header');
+    window.addEventListener('scroll', () => {
+      header.style.borderBottomColor = window.pageYOffset > 100 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.08)';
+    }, { passive: true });
+
+    // Feature cards animation with IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.feature-card').forEach((card, i) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = `opacity 0.6s ease-out ${i * 0.1}s, transform 0.6s ease-out ${i * 0.1}s`;
+      observer.observe(card);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('active')) hamburger.click();
+    });
+  </script>
+</body>
+</html>

@@ -1,646 +1,954 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pulsar List View</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-app:#0f0f0f;--bg-panel:#161616;--bg-card:#1a1a1a;--bg-hover:#242424;--bg-active:#2a2a2a;
+--text-primary:#e8e8e8;--text-secondary:#a0a0a0;--text-muted:#606060;
+--border:#2a2a2a;--border-subtle:#222;--accent:#3b82f6;--accent-dim:#1e3a5f;
+--success:#22c55e;--success-bg:#0d2818;--warning:#f59e0b;--warning-bg:#2b1d0a;
+--error:#ef4444;--error-bg:#2a0f0f;--inprogress:#3b82f6;--inprogress-bg:#0f1a2a;
+--urgent:#f97316;--urgent-bg:#2b150a;--later:#606060;--later-bg:#1a1a1a;
+--font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;
+--row-h:48px;--sub-row-h:42px;--header-h:42px;--trans:140ms ease-out;
+--col-min:120px;
+}
+html,body{height:100%}
+body{background:var(--bg-app);color:var(--text-primary);font-family:var(--font-body);font-size:13px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100%;max-width:1920px;margin:0 auto;padding:20px 24px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-shrink:0}
+h1{font-family:var(--font-display);font-weight:700;font-size:1.5rem;color:var(--text-primary)}
+.toolbar{display:flex;gap:8px;align-items:center}
+.search-box{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--text-primary);width:240px;font-size:13px}
+.search-box:focus{outline:none;border-color:var(--accent)}
+.search-box::placeholder{color:var(--text-muted)}
+.btn{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 16px;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--trans);display:flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg-hover);color:var(--text-primary);border-color:#333}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:#2563eb;border-color:#2563eb}
+.btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
+.list-container{flex:1;display:flex;flex-direction:column;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;min-height:0}
+.list-header{display:flex;height:var(--header-h);border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;gap:0}
+.header-fixed{display:grid;grid-template-columns:4px 36px 320px;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--bg-card);border-right:2px solid var(--border)}
+.header-scroll-wrap{flex:1;overflow-x:auto;overflow-y:hidden;background:var(--bg-card);position:relative;cursor:grab;z-index:1;user-select:none}
+.header-scroll-wrap.dragging{cursor:grabbing;user-select:none}
+.header-scroll-wrap::-webkit-scrollbar{display:none}
+.header-scroll-wrap{-ms-overflow-style:none;scrollbar-width:none}
+.header-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:var(--col-min);height:100%;user-select:none;min-width:100%;pointer-events:none}
+.col-head{display:flex;align-items:center;padding:0 14px;font-family:var(--font-display);font-weight:600;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;border-right:1px solid var(--border-subtle);transition:all var(--trans);gap:6px}
+.col-head:last-child{border-right:none}
+.col-head.sorted{color:var(--accent)}
+.col-head .sort-icon{display:none}
+.list-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;-ms-overflow-style:none;scrollbar-width:none}
+.list-body::-webkit-scrollbar{display:none}
+.list-body-scroll{overflow-x:auto;overflow-y:hidden;-ms-overflow-style:none;scrollbar-width:none}
+.list-body-scroll::-webkit-scrollbar{display:none}
+.task-group{border-bottom:1px solid var(--border)}
+.task-group:last-child{border-bottom:none}
+.task-row{display:grid;grid-template-columns:360px 1fr;height:var(--row-h);border-bottom:1px solid var(--border-subtle);background:var(--bg-panel);transition:background var(--trans);cursor:pointer}
+.task-row:hover{background:var(--bg-hover)}
+.task-row.selected{background:var(--bg-active)}
+.task-row.parent{font-weight:500}
+.row-fixed{display:grid;grid-template-columns:4px 36px 320px;flex-shrink:0;position:relative;z-index:9;background:inherit;border-right:2px solid var(--border)}
+.row-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:var(--col-min);overflow:hidden;min-width:100%;pointer-events:none}
+.row-scroll *{pointer-events:auto}
+.subtask-row{display:grid;grid-template-columns:360px 1fr;height:var(--sub-row-h);border-bottom:1px solid var(--border-subtle);background:var(--bg-panel);transition:background var(--trans);cursor:pointer}
+.subtask-row:hover{background:var(--bg-hover)}
+.subtask-row:last-child{border-bottom:none}
+.cell{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(--border-subtle);overflow:hidden}
+.cell:last-child{border-right:none}
+.cell-color{padding:0;border-right:none}
+.color-bar{width:4px;height:100%;border-radius:0}
+.cell-check{justify-content:center;padding:0}
+.checkbox{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;cursor:pointer;appearance:none;background:transparent;transition:all var(--trans);flex-shrink:0}
+.checkbox:checked{background:var(--accent);border-color:var(--accent)}
+.checkbox:checked::after{content:'✓';display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;height:100%}
+.checkbox:hover{border-color:var(--text-secondary)}
+.cell-title{gap:10px;min-width:0}
+.expand-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;border-radius:4px;transition:all var(--trans)}
+.expand-btn:hover{background:var(--bg-active)}
+.expand-btn svg{width:12px;height:12px;stroke:var(--text-muted);stroke-width:2;transition:transform var(--trans)}
+.expand-btn.expanded svg{transform:rotate(90deg)}
+.task-icon{font-size:15px;flex-shrink:0}
+.task-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:var(--text-primary)}
+.task-name.completed{text-decoration:line-through;color:var(--text-muted);opacity:0.7}
+.subtask-indent{width:28px;flex-shrink:0;position:relative}
+.subtask-indent::before{content:'';position:absolute;left:10px;top:-6px;width:1px;height:100%;background:var(--border)}
+.subtask-indent::after{content:'';position:absolute;left:10px;top:50%;width:10px;height:1px;background:var(--border)}
+.cell-text{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell-date{font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;font-weight:500}
+.cell-link{display:flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;font-size:11px;transition:color var(--trans)}
+.cell-link:hover{color:#60a5fa}
+.cell-link svg{width:12px;height:12px}
+.status-pill{padding:4px 10px;border-radius:5px;font-size:10px;font-weight:600;white-space:nowrap;letter-spacing:0.3px}
+.status-overdue{background:var(--error-bg);color:var(--error);border:1px solid var(--error)}
+.status-done{background:var(--success-bg);color:var(--success);border:1px solid var(--success)}
+.status-inprogress{background:var(--inprogress-bg);color:var(--inprogress);border:1px solid var(--inprogress)}
+.status-urgent{background:var(--urgent-bg);color:var(--urgent);border:1px solid var(--urgent)}
+.status-soon{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning)}
+.status-later{background:var(--later-bg);color:var(--later);border:1px solid #444}
+.importance-badge{display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
+.imp-critical{background:rgba(239,68,68,0.15);color:var(--error);border:1px solid rgba(239,68,68,0.3)}
+.imp-high{background:rgba(249,115,22,0.15);color:var(--urgent);border:1px solid rgba(249,115,22,0.3)}
+.imp-medium{background:rgba(245,158,11,0.15);color:var(--warning);border:1px solid rgba(245,158,11,0.3)}
+.imp-low{background:rgba(34,197,94,0.15);color:var(--success);border:1px solid rgba(34,197,94,0.3)}
+.importance-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.urgency-gauge{display:flex;align-items:center;gap:8px;width:100%}
+.urgency-bar{height:8px;border-radius:4px;background:var(--bg-hover);flex:1;overflow:hidden;border:1px solid var(--border-subtle)}
+.urgency-fill{height:100%;border-radius:3px;transition:width var(--trans)}
+.urgency-label{font-size:10px;font-weight:600;color:var(--text-muted);min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
+.impact-gauge{display:flex;align-items:center;gap:6px;width:100%}
+.impact-dots{display:flex;gap:3px}
+.impact-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background var(--trans)}
+.impact-dot.filled{background:var(--accent)}
+.impact-score{font-size:11px;font-weight:600;color:var(--text-secondary);min-width:20px;font-variant-numeric:tabular-nums}
+.block-indicator{display:flex;align-items:center;gap:6px;padding:3px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:4px;font-size:10px;color:var(--error);max-width:fit-content}
+.block-indicator svg{width:11px;height:11px;flex-shrink:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;width:95%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-header h2{font-family:var(--font-display);font-weight:600;font-size:1.125rem;color:var(--text-primary)}
+.close-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg-hover);border:none;border-radius:6px;cursor:pointer;transition:background var(--trans)}
+.close-btn:hover{background:var(--bg-active)}
+.close-btn svg{width:14px;height:14px;stroke:var(--text-secondary);stroke-width:2}
+.modal-body{flex:1;overflow-y:auto;padding:24px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--border);flex-shrink:0}
+.form-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border-subtle)}
+.form-section:last-child{margin-bottom:0;border-bottom:none;padding-bottom:0}
+.section-label{font-family:var(--font-display);font-weight:600;font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.form-row{display:grid;gap:14px;margin-bottom:14px}
+.form-row:last-child{margin-bottom:0}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.form-row.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.field input,.field select,.field textarea{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;transition:border-color var(--trans);font-family:var(--font-body)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--bg-hover)}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-muted)}
+.field textarea{resize:vertical;min-height:90px;line-height:1.6}
+.field input[type="color"]{padding:3px;height:40px;cursor:pointer}
+.field input[type="checkbox"]{width:18px;height:18px}
+.checkbox-row{display:flex;align-items:center;gap:10px;padding:8px 0}
+.checkbox-row span{font-size:13px;color:var(--text-secondary)}
+.subtask-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:14px}
+.subtask-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.subtask-panel-header span{font-family:var(--font-display);font-weight:600;font-size:12px;color:var(--text-secondary)}
+.subtask-add-row{display:grid;grid-template-columns:1fr 110px 110px auto;gap:10px;align-items:end}
+.subtask-add-row input{padding:8px 10px;font-size:12px}
+.subtask-add-row .btn{padding:8px 12px;font-size:11px}
+.subtask-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.subtask-item{display:grid;grid-template-columns:22px 1fr 100px 100px 80px 80px 60px 30px;gap:10px;align-items:center;padding:10px;background:var(--bg-panel);border-radius:6px;border:1px solid var(--border-subtle)}
+.subtask-item input[type="text"]{background:transparent;border:none;color:var(--text-primary);font-size:12px;padding:0}
+.subtask-item input[type="text"]:focus{outline:none}
+.subtask-item input[type="date"],.subtask-item select{padding:5px 7px;font-size:11px}
+.subtask-del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:4px;cursor:pointer;color:var(--text-muted);transition:all var(--trans)}
+.subtask-del:hover{background:var(--error-bg);color:var(--error)}
+.btn-danger{background:var(--error);border-color:var(--error);color:#fff}
+.btn-danger:hover{background:#dc2626;border-color:#dc2626}
+.btn-success{background:var(--success);border-color:var(--success);color:#fff}
+.btn-success:hover{background:#16a34a;border-color:#16a34a}
+.ai-insight{background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;margin-top:14px;display:flex;align-items:flex-start;gap:12px}
+.ai-insight svg{width:18px;height:18px;stroke:var(--accent);flex-shrink:0;margin-top:2px}
+.ai-insight-text{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.ai-insight-text strong{color:var(--accent);font-weight:600}
+.filter-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.filter-chip{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text-secondary);cursor:pointer;transition:all var(--trans);display:flex;align-items:center;gap:6px;font-weight:500}
+.filter-chip:hover{border-color:#444;color:var(--text-primary);background:var(--bg-hover)}
+.filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--text-muted)}
+.empty-state svg{width:56px;height:56px;stroke:var(--text-muted);stroke-width:1;margin-bottom:20px;opacity:0.5}
+.empty-state p{font-size:14px;color:var(--text-secondary)}
+</style>
 </head>
 <body>
-  <div id="app"></div>
+<div class="app">
+<header>
+<h1>List View</h1>
+<div class="toolbar">
+<input type="text" class="search-box" id="searchBox" placeholder="Search tasks...">
+<button class="btn" id="filterBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>Filter</button>
+<button class="btn btn-primary" id="addTaskBtn"><svg viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Task</button>
+</div>
+</header>
+<div class="filter-bar" id="filterBar">
+<div class="filter-chip active" data-filter="all">All Tasks</div>
+<div class="filter-chip" data-filter="overdue">Overdue</div>
+<div class="filter-chip" data-filter="inprogress">In Progress</div>
+<div class="filter-chip" data-filter="done">Completed</div>
+<div class="filter-chip" data-filter="later">Later</div>
+</div>
+<div class="list-container">
+<div class="list-header">
+<div class="header-fixed">
+<div class="col-head cell-color"></div>
+<div class="col-head cell-check"></div>
+<div class="col-head" data-sort="title">Title<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+</div>
+<div class="header-scroll-wrap">
+<div class="header-scroll" id="headerScroll">
+<div class="col-head" data-sort="project">Project<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="projectLink">Link<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="dueDate">Due Date<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="dueTime">Due Time<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="startDate">Start Date<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="estimate">Estimate<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="importance">Importance<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="urgency">Urgency<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="impact">Impact<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="state">State<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="completedAt">Completed<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+<div class="col-head" data-sort="blockReason">Blocked<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+</div>
+</div>
+</div>
+<div class="list-body" id="listBody"></div>
+</div>
+</div>
+<div class="modal-overlay" id="taskModal">
+<div class="modal">
+<div class="modal-header">
+<h2 id="modalTitle">Task Details</h2>
+<button class="close-btn" id="modalClose"><svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div>
+<div class="modal-body">
+<div class="form-section">
+<div class="section-label">🧩 Identity</div>
+<div class="form-row cols-2">
+<div class="field"><label>Title</label><input type="text" id="mTitle"></div>
+<div class="field"><label>Project</label><input type="text" id="mProject"></div>
+</div>
+<div class="form-row cols-4">
+<div class="field"><label>Icon</label><input type="text" id="mIcon" maxlength="2" style="text-align:center;font-size:18px"></div>
+<div class="field"><label>Color</label><input type="color" id="mColor"></div>
+<div class="field"><label>Category</label><input type="text" id="mCategory"></div>
+<div class="field"><label>Tags</label><input type="text" id="mTags" placeholder="comma separated"></div>
+</div>
+</div>
+<div class="form-section">
+<div class="section-label">📅 Schedule & Planning</div>
+<div class="form-row cols-4">
+<div class="field"><label>Start Date</label><input type="date" id="mStartDate"></div>
+<div class="field"><label>Due Date</label><input type="date" id="mDueDate"></div>
+<div class="field"><label>Start Time</label><input type="time" id="mStartTime"></div>
+<div class="field"><label>Due Time</label><input type="time" id="mDueTime"></div>
+</div>
+<div class="form-row cols-3">
+<div class="field"><label>Recurrence</label>
+<select id="mRecurrence"><option value="">None</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="biweekly">Bi-weekly</option><option value="monthly">Monthly</option></select>
+</div>
+<div class="field"><label>Time Estimate (hrs)</label><input type="number" id="mEstimate" min="0" step="0.5"></div>
+<div class="field"><label>Project Link</label><input type="url" id="mLink" placeholder="https://..."></div>
+</div>
+</div>
+<div class="form-section">
+<div class="section-label">🎯 Priority & Impact</div>
+<div class="form-row cols-3">
+<div class="field"><label>Importance</label>
+<select id="mImportance"><option value="">Select</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select>
+</div>
+<div class="field"><label>Impact Score (1-10)</label><input type="number" id="mImpact" min="1" max="10"></div>
+<div class="field"><label>Energy Required</label>
+<select id="mEnergy"><option value="">Select</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+</div>
+</div>
+<div class="checkbox-row"><input type="checkbox" class="checkbox" id="mFocus"><span>Focus Eligible</span></div>
+<div class="ai-insight" id="aiInsight" style="display:none">
+<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+<div class="ai-insight-text" id="aiInsightText"></div>
+</div>
+</div>
+<div class="form-section">
+<div class="section-label">📝 Content & Context</div>
+<div class="field"><label>Notes</label><textarea id="mNotes" placeholder="Task description, context, and notes..."></textarea></div>
+<div class="form-row cols-2">
+<div class="field"><label>Linked Docs</label><input type="text" id="mLinkedDocs" placeholder="Document URLs..."></div>
+<div class="field"><label>Web Clips</label><input type="url" id="mWebClips"></div>
+</div>
+</div>
+<div class="form-section">
+<div class="section-label">🔄 Dependencies & Blockers</div>
+<div class="form-row cols-2">
+<div class="field"><label>Depends On (Task IDs)</label><input type="text" id="mDeps" placeholder="1, 2, 3..."></div>
+<div class="field"><label>Block Reason</label><input type="text" id="mBlock" placeholder="Why is this blocked?"></div>
+</div>
+</div>
+<div class="form-section">
+<div class="section-label">🧠 Subtasks</div>
+<div class="subtask-panel">
+<div class="subtask-add-row">
+<div class="field"><label>Title</label><input type="text" id="subTitle" placeholder="Subtask name"></div>
+<div class="field"><label>Start</label><input type="date" id="subStart"></div>
+<div class="field"><label>Due</label><input type="date" id="subDue"></div>
+<button class="btn btn-primary" id="addSubBtn" disabled>Add</button>
+</div>
+<div class="subtask-list" id="subtaskList"></div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-danger" id="deleteBtn">Delete</button>
+<button class="btn btn-success" id="duplicateBtn">Duplicate</button>
+<button class="btn" id="cancelBtn">Cancel</button>
+<button class="btn btn-primary" id="saveBtn">Save Changes</button>
+</div>
+</div>
+</div>
+<script>
+const CONFIG={startDate:new Date('2026-01-01')};
+let tasks=[],currentTask=null,nextId=1,sortKey='dueDate',sortDir=1,activeFilter='all',expandedTasks=new Set();
 
-  <script>
-    // Icon components as SVG
-    const icons = {
-      trash: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
-      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path></svg>`,
-      chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
-      chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
-      trashSmall: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`
-    };
+function createTask(p={}){
+const now=new Date().toISOString();
+return{
+id:p.id||nextId++,title:p.title||'',icon:p.icon||'📋',color:p.color||'#3b82f6',
+project:p.project||'',category:p.category||'',tags:p.tags||'',
+startDate:p.startDate||'',dueDate:p.dueDate||'',startTime:p.startTime||'',dueTime:p.dueTime||'',
+recurrence:p.recurrence||'',estimate:p.estimate||0,projectLink:p.projectLink||'',
+importance:p.importance||'',impactScore:p.impactScore||0,energyMode:p.energyMode||'',
+focusEligible:p.focusEligible!==undefined?p.focusEligible:true,
+notes:p.notes||'',linkedDocs:p.linkedDocs||'',webClips:p.webClips||'',
+dependencies:p.dependencies||'',blockReason:p.blockReason||'',
+completed:p.completed||false,subtasks:p.subtasks||null,
+system:{createdAt:p.system?.createdAt||now,lastModified:now,completedAt:p.system?.completedAt||null,version:p.system?.version||1,autoPriorityWeight:0}
+};
+}
 
-    // State management
-    let state = {
-      tasks: [
-        { 
-          id: 1, 
-          task: 'Math Homework', 
-          status: 'In Progress', 
-          priority: 'High', 
-          progress: 50,
-          projectLink: '',
-          dueDate: '2026-01-15',
-          dueTime: '14:00',
-          startDate: '2026-01-01',
-          timeEstimate: '4h',
-          importanceLevel: 'High',
-          urgency: 'High',
-          impactScore: 8,
-          state: 'Active',
-          completionTimestamp: '',
-          blockReason: '',
-          parentId: null,
-          isExpanded: true
-        },
-        { 
-          id: 2, 
-          task: 'Complete worksheet packets', 
-          status: 'In Progress', 
-          priority: 'High', 
-          progress: 30,
-          projectLink: '',
-          dueDate: '2026-01-10',
-          dueTime: '',
-          startDate: '',
-          timeEstimate: '2h',
-          importanceLevel: 'Medium',
-          urgency: 'Medium',
-          impactScore: 5,
-          state: 'Active',
-          completionTimestamp: '',
-          blockReason: '',
-          parentId: 1,
-          isExpanded: false
-        },
-        { 
-          id: 3, 
-          task: 'Study for quiz', 
-          status: 'Not Started', 
-          priority: 'Medium', 
-          progress: 0,
-          projectLink: '',
-          dueDate: '2026-01-12',
-          dueTime: '',
-          startDate: '',
-          timeEstimate: '1.5h',
-          importanceLevel: 'High',
-          urgency: 'Medium',
-          impactScore: 7,
-          state: 'Active',
-          completionTimestamp: '',
-          blockReason: '',
-          parentId: 1,
-          isExpanded: false
-        }
-      ],
-      showColumnManager: false,
-      showAddTaskModal: false,
-      showAddColumnModal: false,
-      newTaskName: '',
-      selectedParentId: null,
-      newColumnName: '',
-      newColumnType: 'text',
-      customColumns: [],
-      visibleColumns: {
-        task: true,
-        status: true,
-        priority: true,
-        progress: true,
-        projectLink: false,
-        dueDate: false,
-        dueTime: false,
-        startDate: false,
-        timeEstimate: false,
-        importanceLevel: false,
-        urgency: false,
-        impactScore: false,
-        state: false,
-        completionTimestamp: false,
-        blockReason: false
-      }
-    };
+function createSubtask(p={}){
+return{
+title:p.title||'',startDate:p.startDate||'',dueDate:p.dueDate||'',
+importance:p.importance||'',impactScore:p.impactScore||0,
+completed:p.completed||false
+};
+}
 
-    const columnDefinitions = {
-      task: { label: 'Task', type: 'text' },
-      status: { label: 'Status', type: 'select', options: ['Not Started', 'In Progress', 'Completed', 'On Hold'] },
-      priority: { label: 'Priority', type: 'select', options: ['Low', 'Medium', 'High'] },
-      progress: { label: 'Progress', type: 'progress' },
-      projectLink: { label: 'Project Link', type: 'url' },
-      dueDate: { label: 'Due Date', type: 'date' },
-      dueTime: { label: 'Due Time', type: 'time' },
-      startDate: { label: 'Start Date', type: 'date' },
-      timeEstimate: { label: 'Time Estimate', type: 'text' },
-      importanceLevel: { label: 'Importance Level', type: 'select', options: ['Low', 'Medium', 'High', 'Critical'] },
-      urgency: { label: 'Urgency', type: 'select', options: ['Low', 'Medium', 'High', 'Critical'] },
-      impactScore: { label: 'Impact Score', type: 'number' },
-      state: { label: 'State', type: 'select', options: ['Active', 'Paused', 'Blocked', 'Archived'] },
-      completionTimestamp: { label: 'Completion Timestamp', type: 'datetime' },
-      blockReason: { label: 'Block Reason / Dependency', type: 'text' }
-    };
+function computeDerived(task){
+const today=new Date();today.setHours(0,0,0,0);
+const dueDate=task.dueDate?new Date(task.dueDate+'T00:00:00'):null;
+const startDate=task.startDate?new Date(task.startDate+'T00:00:00'):null;
+if(!dueDate)return{label:'later',urgencyScore:0,isUrgent:false,daysUntilDue:null};
+const daysUntilDue=Math.floor((dueDate-today)/(864e5));
+const daysUntilStart=startDate?Math.floor((startDate-today)/(864e5)):daysUntilDue;
+const isOverdue=daysUntilDue<0&&!task.completed;
+const isInProgress=daysUntilStart<=0&&daysUntilDue>=0&&!task.completed;
+let urgencyScore=daysUntilDue<=0?10:daysUntilDue<=1?9:daysUntilDue<=3?7:daysUntilDue<=7?5:daysUntilDue<=14?3:1;
+const impMap={low:2,medium:5,high:8,critical:10};
+const impScore=impMap[task.importance]||0;
+task.system.autoPriorityWeight=impScore*0.4+(task.impactScore||0)*0.3+urgencyScore*0.3;
+let label='later',isUrgent=false;
+if(task.completed)label='done';
+else if(isOverdue)label='overdue';
+else if(isInProgress){label='inprogress';isUrgent=daysUntilDue<=1;}
+else if(daysUntilDue<=3)label='soon';
+return{label,urgencyScore,isUrgent,daysUntilDue};
+}
 
-    const getColumnWidth = (column) => {
-      const widths = {
-        task: 'min-w-[280px]',
-        status: 'min-w-[160px]',
-        priority: 'min-w-[140px]',
-        progress: 'min-w-[200px]',
-        projectLink: 'min-w-[220px]',
-        dueDate: 'min-w-[160px]',
-        dueTime: 'min-w-[140px]',
-        startDate: 'min-w-[160px]',
-        timeEstimate: 'min-w-[150px]',
-        importanceLevel: 'min-w-[170px]',
-        urgency: 'min-w-[140px]',
-        impactScore: 'min-w-[140px]',
-        state: 'min-w-[140px]',
-        completionTimestamp: 'min-w-[220px]',
-        blockReason: 'min-w-[220px]'
-      };
-      return widths[column] || 'min-w-[180px]';
-    };
+function getSubtaskState(sub){
+if(sub.completed)return{label:'done',isUrgent:false,urgencyScore:0};
+if(!sub.dueDate)return{label:'later',isUrgent:false,urgencyScore:0};
+const today=new Date();today.setHours(0,0,0,0);
+const dueDate=new Date(sub.dueDate+'T00:00:00');
+const startDate=sub.startDate?new Date(sub.startDate+'T00:00:00'):null;
+const daysUntil=Math.floor((dueDate-today)/(864e5));
+const daysUntilStart=startDate?Math.floor((startDate-today)/(864e5)):daysUntil;
+let urgencyScore=daysUntil<=0?10:daysUntil<=1?9:daysUntil<=3?7:daysUntil<=7?5:daysUntil<=14?3:1;
+if(daysUntil<0)return{label:'overdue',isUrgent:false,urgencyScore};
+if(daysUntilStart<=0&&daysUntil>=0)return{label:'inprogress',isUrgent:daysUntil<=1,urgencyScore};
+if(daysUntil<=3)return{label:'soon',isUrgent:false,urgencyScore};
+return{label:'later',isUrgent:false,urgencyScore};
+}
 
-    // Helper functions
-    function getAllColumnDefinitions() {
-      const allDefs = {...columnDefinitions};
-      state.customColumns.forEach(col => {
-        allDefs[col.id] = col;
-      });
-      return allDefs;
-    }
+function statusClass(label,isUrgent){
+if(label==='overdue')return'status-overdue';
+if(label==='done')return'status-done';
+if(label==='inprogress')return isUrgent?'status-urgent':'status-inprogress';
+if(label==='soon')return'status-soon';
+return'status-later';
+}
 
-    function hasSubtasks(taskId) {
-      return state.tasks.some(task => task.parentId === taskId);
-    }
+function statusText(label,isUrgent){
+if(label==='overdue')return'Overdue';
+if(label==='done')return'Done';
+if(label==='inprogress')return isUrgent?'Urgent':'Active';
+if(label==='soon')return'Soon';
+return'Later';
+}
 
-    function addTask() {
-      if (state.newTaskName.trim()) {
-        const newTaskObj = { 
-          id: Date.now(), 
-          task: state.newTaskName, 
-          status: 'Not Started',
-          priority: 'Medium',
-          progress: 0,
-          parentId: state.selectedParentId,
-          isExpanded: false
-        };
-        
-        Object.keys(columnDefinitions).forEach(key => {
-          if (!(key in newTaskObj)) {
-            newTaskObj[key] = '';
-          }
-        });
-        
-        state.customColumns.forEach(col => {
-          newTaskObj[col.id] = '';
-        });
-        
-        state.tasks.push(newTaskObj);
-        state.newTaskName = '';
-        state.selectedParentId = null;
-        state.showAddTaskModal = false;
-        render();
-      }
-    }
+function importanceClass(imp){
+if(imp==='critical')return'imp-critical';
+if(imp==='high')return'imp-high';
+if(imp==='medium')return'imp-medium';
+if(imp==='low')return'imp-low';
+return'';
+}
 
-    function updateTask(id, field, value) {
-      const task = state.tasks.find(t => t.id === id);
-      if (task) {
-        task[field] = value;
-        render();
-      }
-    }
+function urgencyColor(score){
+if(score>=9)return'var(--error)';
+if(score>=7)return'var(--urgent)';
+if(score>=5)return'var(--warning)';
+if(score>=3)return'var(--accent)';
+return'var(--text-muted)';
+}
 
-    function deleteTask(id) {
-      state.tasks = state.tasks.filter(task => task.id !== id && task.parentId !== id);
-      render();
-    }
+function formatDate(d){
+if(!d)return'—';
+const date=new Date(d+'T00:00:00');
+return date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
 
-    function toggleExpand(id) {
-      const task = state.tasks.find(t => t.id === id);
-      if (task) {
-        task.isExpanded = !task.isExpanded;
-        render();
-      }
-    }
+function formatTime(t){
+if(!t)return'—';
+const[h,m]=t.split(':');
+const hr=parseInt(h);
+const ampm=hr>=12?'PM':'AM';
+const hr12=hr%12||12;
+return`${hr12}:${m} ${ampm}`;
+}
 
-    function toggleColumn(column) {
-      state.visibleColumns[column] = !state.visibleColumns[column];
-      render();
-    }
+function getSortValue(task,key){
+const d=computeDerived(task);
+switch(key){
+case'title':return task.title.toLowerCase();
+case'color':return task.color||'#000000';
+case'project':return(task.project||'').toLowerCase();
+case'projectLink':return task.projectLink?0:1;
+case'dueDate':return task.dueDate||'9999-12-31';
+case'dueTime':return task.dueTime||'23:59';
+case'startDate':return task.startDate||'9999-12-31';
+case'importance':const impOrder={critical:4,high:3,medium:2,low:1};return impOrder[task.importance]||0;
+case'urgency':return d.urgencyScore;
+case'impact':return task.impactScore||0;
+case'estimate':return task.estimate||0;
+case'state':const stateOrder={overdue:5,inprogress:4,soon:3,later:2,done:1};return stateOrder[d.label]||0;
+case'completedAt':return task.system.completedAt||'9999-12-31';
+case'blockReason':return task.blockReason?0:1;
+default:return 0;
+}
+}
 
-    function addCustomColumn() {
-      if (state.newColumnName.trim()) {
-        const columnId = `custom_${Date.now()}`;
-        const newColumn = {
-          id: columnId,
-          label: state.newColumnName,
-          type: state.newColumnType
-        };
-        
-        state.customColumns.push(newColumn);
-        state.visibleColumns[columnId] = true;
-        
-        state.tasks.forEach(task => {
-          task[columnId] = '';
-        });
-        
-        state.newColumnName = '';
-        state.newColumnType = 'text';
-        state.showAddColumnModal = false;
-        render();
-      }
-    }
+function sortTasks(arr){
+return[...arr].sort((a,b)=>{
+const av=getSortValue(a,sortKey);
+const bv=getSortValue(b,sortKey);
+if(av<bv)return-1*sortDir;
+if(av>bv)return 1*sortDir;
+return 0;
+});
+}
 
-    function deleteCustomColumn(columnId) {
-      state.customColumns = state.customColumns.filter(col => col.id !== columnId);
-      delete state.visibleColumns[columnId];
-      render();
-    }
+function filterTasks(arr){
+if(activeFilter==='all')return arr;
+return arr.filter(t=>{
+const d=computeDerived(t);
+return d.label===activeFilter||(activeFilter==='inprogress'&&(d.label==='inprogress'||d.label==='soon'));
+});
+}
 
-    function renderCell(task, column, depth) {
-      const allDefs = getAllColumnDefinitions();
-      const def = allDefs[column];
-      const value = task[column] || '';
+function searchTasks(arr,q){
+if(!q)return arr;
+const lq=q.toLowerCase();
+return arr.filter(t=>t.title.toLowerCase().includes(lq)||(t.project||'').toLowerCase().includes(lq)||(t.tags||'').toLowerCase().includes(lq)||(t.category||'').toLowerCase().includes(lq));
+}
 
-      if (column === 'task') {
-        const hasSubs = hasSubtasks(task.id);
-        return `
-          <div class="flex items-center gap-2">
-            <div style="margin-left: ${depth * 24}px" class="flex items-center gap-2">
-              ${hasSubs ? `
-                <button onclick="toggleExpand(${task.id})" class="flex-shrink-0 hover:bg-gray-200 rounded p-1">
-                  ${task.isExpanded ? icons.chevronDown : icons.chevronRight}
-                </button>
-              ` : '<div class="w-6"></div>'}
-              <input
-                type="text"
-                value="${value}"
-                onchange="updateTask(${task.id}, '${column}', this.value)"
-                class="flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-              />
-            </div>
-          </div>
-        `;
-      }
+function renderImpactGauge(score){
+if(!score)return'<span class="cell-text">—</span>';
+let html='<div class="impact-gauge"><div class="impact-dots">';
+for(let i=1;i<=10;i++){
+html+=`<div class="impact-dot${i<=score?' filled':''}"></div>`;
+}
+html+=`</div><span class="impact-score">${score}/10</span></div>`;
+return html;
+}
 
-      switch (def.type) {
-        case 'text':
-        case 'url':
-          return `
-            <input
-              type="text"
-              value="${value}"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              placeholder="${def.type === 'url' ? 'https://...' : ''}"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            />
-          `;
-        case 'date':
-          return `
-            <input
-              type="date"
-              value="${value}"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            />
-          `;
-        case 'time':
-          return `
-            <input
-              type="time"
-              value="${value}"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            />
-          `;
-        case 'datetime':
-          return `
-            <input
-              type="datetime-local"
-              value="${value}"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            />
-          `;
-        case 'number':
-          return `
-            <input
-              type="number"
-              value="${value}"
-              min="0"
-              max="10"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            />
-          `;
-        case 'select':
-          return `
-            <select
-              value="${value}"
-              onchange="updateTask(${task.id}, '${column}', this.value)"
-              class="w-full bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm min-w-0"
-            >
-              <option value="">-</option>
-              ${def.options.map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-            </select>
-          `;
-        case 'progress':
-          return `
-            <div class="flex items-center gap-2">
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value="${value}"
-                oninput="updateTask(${task.id}, '${column}', parseInt(this.value))"
-                class="flex-1 min-w-0"
-              />
-              <span class="text-sm font-medium w-10 text-right">${value}%</span>
-            </div>
-          `;
-        default:
-          return `<span class="text-sm">${value}</span>`;
-      }
-    }
+function renderUrgencyGauge(score){
+const pct=score*10;
+const color=urgencyColor(score);
+return`<div class="urgency-gauge"><div class="urgency-bar"><div class="urgency-fill" style="width:${pct}%;background:${color}"></div></div><span class="urgency-label">${score}/10</span></div>`;
+}
 
-    function renderTaskRow(task, depth = 0) {
-      const children = state.tasks.filter(t => t.parentId === task.id);
-      const visibleCols = Object.keys(state.visibleColumns).filter(col => state.visibleColumns[col]);
-      let rows = '';
-      
-      rows += `
-        <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-          ${visibleCols.map(col => `
-            <td class="px-4 py-3 border-r border-gray-200 ${getColumnWidth(col)}">
-              ${renderCell(task, col, depth)}
-            </td>
-          `).join('')}
-          <td class="px-4 py-3 text-center">
-            <button
-              onclick="deleteTask(${task.id})"
-              class="text-red-500 hover:text-red-700 transition-colors"
-            >
-              ${icons.trash}
-            </button>
-          </td>
-        </tr>
-      `;
+function render(){
+const body=document.getElementById('listBody');
+const query=document.getElementById('searchBox').value;
+let filtered=filterTasks(tasks);
+filtered=searchTasks(filtered,query);
+filtered=sortTasks(filtered);
+if(filtered.length===0){
+body.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg><p>No tasks found</p></div>`;
+return;
+}
+let html='';
+filtered.forEach(task=>{
+const d=computeDerived(task);
+const hasSubtasks=task.subtasks&&task.subtasks.length>0;
+const isExpanded=expandedTasks.has(task.id);
+html+=`<div class="task-group" data-id="${task.id}">`;
+html+=`<div class="task-row${hasSubtasks?' parent':''}" data-id="${task.id}">`;
+html+=`<div class="row-fixed">`;
+html+=`<div class="cell cell-color"><div class="color-bar" style="background:${task.color}"></div></div>`;
+html+=`<div class="cell cell-check"><input type="checkbox" class="checkbox task-check"${task.completed?' checked':''}></div>`;
+html+=`<div class="cell cell-title">`;
+if(hasSubtasks){
+html+=`<div class="expand-btn${isExpanded?' expanded':''}" data-id="${task.id}"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6"/></svg></div>`;
+}else{
+html+=`<div style="width:22px"></div>`;
+}
+html+=`<span class="task-icon">${task.icon||'📋'}</span>`;
+html+=`<span class="task-name${task.completed?' completed':''}" data-id="${task.id}">${task.title}</span>`;
+html+=`</div>`;
+html+=`</div>`;
+html+=`<div class="row-scroll">`;
+html+=`<div class="cell"><span class="cell-text">${task.project||'—'}</span></div>`;
+html+=`<div class="cell">`;
+if(task.projectLink){
+const shortUrl=new URL(task.projectLink).hostname.replace('www.','');
+html+=`<a href="${task.projectLink}" class="cell-link" target="_blank" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>${shortUrl}</a>`;
+}else{
+html+=`<span class="cell-text">—</span>`;
+}
+html+=`</div>`;
+html+=`<div class="cell"><span class="cell-date">${formatDate(task.dueDate)}</span></div>`;
+html+=`<div class="cell"><span class="cell-date">${formatTime(task.dueTime)}</span></div>`;
+html+=`<div class="cell"><span class="cell-date">${formatDate(task.startDate)}</span></div>`;
+html+=`<div class="cell"><span class="cell-text">${task.estimate?task.estimate+'h':'—'}</span></div>`;
+html+=`<div class="cell">`;
+if(task.importance){
+const impClass=importanceClass(task.importance);
+html+=`<div class="importance-badge ${impClass}"><div class="importance-dot"></div><span>${task.importance.charAt(0).toUpperCase()+task.importance.slice(1)}</span></div>`;
+}else{
+html+=`<span class="cell-text">—</span>`;
+}
+html+=`</div>`;
+html+=`<div class="cell">${renderUrgencyGauge(d.urgencyScore)}</div>`;
+html+=`<div class="cell">${renderImpactGauge(task.impactScore)}</div>`;
+html+=`<div class="cell"><span class="status-pill ${statusClass(d.label,d.isUrgent)}">${statusText(d.label,d.isUrgent)}</span></div>`;
+html+=`<div class="cell"><span class="cell-date">${task.system.completedAt?formatDate(task.system.completedAt.split('T')[0]):'—'}</span></div>`;
+html+=`<div class="cell">`;
+if(task.blockReason){
+html+=`<div class="block-indicator" title="${task.blockReason}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/></svg><span>Blocked</span></div>`;
+}else{
+html+=`<span class="cell-text">—</span>`;
+}
+html+=`</div>`;
+html+=`</div>`;
+html+=`</div>`;
 
-      if (task.isExpanded && children.length > 0) {
-        children.forEach(child => {
-          rows += renderTaskRow(child, depth + 1);
-        });
-      }
+if(hasSubtasks&&isExpanded){
+task.subtasks.forEach((sub,idx)=>{
+const ss=getSubtaskState(sub);
+html+=`<div class="subtask-row" data-parent="${task.id}" data-idx="${idx}">`;
+html+=`<div class="row-fixed">`;
+html+=`<div class="cell cell-color"><div class="color-bar" style="background:${task.color};opacity:0.5"></div></div>`;
+html+=`<div class="cell cell-check"><input type="checkbox" class="checkbox sub-check"${sub.completed?' checked':''}></div>`;
+html+=`<div class="cell cell-title"><div class="subtask-indent"></div><span class="task-name${sub.completed?' completed':''}" style="font-weight:400;font-size:12px">${sub.title}</span></div>`;
+html+=`</div>`;
+html+=`<div class="row-scroll">`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`<div class="cell"><span class="cell-date">${formatDate(sub.dueDate)}</span></div>`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`<div class="cell"><span class="cell-date">${formatDate(sub.startDate)}</span></div>`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`<div class="cell">`;
+if(sub.importance){
+const impClass=importanceClass(sub.importance);
+html+=`<div class="importance-badge ${impClass}"><div class="importance-dot"></div><span>${sub.importance.charAt(0).toUpperCase()+sub.importance.slice(1)}</span></div>`;
+}else{
+html+=`<span class="cell-text">—</span>`;
+}
+html+=`</div>`;
+html+=`<div class="cell">${renderUrgencyGauge(ss.urgencyScore)}</div>`;
+html+=`<div class="cell">${renderImpactGauge(sub.impactScore)}</div>`;
+html+=`<div class="cell"><span class="status-pill ${statusClass(ss.label,ss.isUrgent)}">${statusText(ss.label,ss.isUrgent)}</span></div>`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`<div class="cell"><span class="cell-text">—</span></div>`;
+html+=`</div>`;
+html+=`</div>`;
+});
+}
+html+=`</div>`;
+});
+body.innerHTML=html;
+bindRowEvents();
+}
 
-      return rows;
-    }
+function bindRowEvents(){
+document.querySelectorAll('.task-check').forEach(cb=>{
+cb.onclick=e=>{
+e.stopPropagation();
+const row=cb.closest('.task-row');
+const id=parseInt(row.dataset.id);
+const task=tasks.find(t=>t.id===id);
+if(task){
+task.completed=cb.checked;
+task.system.lastModified=new Date().toISOString();
+task.system.completedAt=task.completed?new Date().toISOString():null;
+if(task.completed&&task.subtasks)task.subtasks.forEach(s=>s.completed=true);
+render();
+}
+};
+});
+document.querySelectorAll('.sub-check').forEach(cb=>{
+cb.onclick=e=>{
+e.stopPropagation();
+const row=cb.closest('.subtask-row');
+const pid=parseInt(row.dataset.parent);
+const idx=parseInt(row.dataset.idx);
+const task=tasks.find(t=>t.id===pid);
+if(task&&task.subtasks&&task.subtasks[idx]!==undefined){
+task.subtasks[idx].completed=cb.checked;
+checkParentCompletion(task);
+render();
+}
+};
+});
+document.querySelectorAll('.expand-btn').forEach(btn=>{
+btn.onclick=e=>{
+e.stopPropagation();
+const id=parseInt(btn.dataset.id);
+if(expandedTasks.has(id))expandedTasks.delete(id);
+else expandedTasks.add(id);
+render();
+};
+});
+document.querySelectorAll('.task-name[data-id]').forEach(el=>{
+el.onclick=e=>{
+e.stopPropagation();
+const id=parseInt(el.dataset.id);
+const task=tasks.find(t=>t.id===id);
+if(task)openModal(task);
+};
+});
+document.querySelectorAll('.task-row').forEach(row=>{
+row.onclick=e=>{
+if(e.target.classList.contains('checkbox')||e.target.closest('.expand-btn')||e.target.closest('.cell-link'))return;
+const id=parseInt(row.dataset.id);
+const task=tasks.find(t=>t.id===id);
+if(task)openModal(task);
+};
+});
+document.querySelectorAll('.subtask-row').forEach(row=>{
+row.onclick=e=>{
+if(e.target.classList.contains('checkbox'))return;
+const pid=parseInt(row.dataset.parent);
+const task=tasks.find(t=>t.id===pid);
+if(task)openModal(task);
+};
+});
+}
 
-    function render() {
-      const visibleCols = Object.keys(state.visibleColumns).filter(col => state.visibleColumns[col]);
-      const parentTasks = state.tasks.filter(t => !t.parentId);
-      const parentTaskOptions = state.tasks.filter(t => !t.parentId);
+function checkParentCompletion(task){
+if(task.subtasks&&task.subtasks.length>0){
+task.completed=task.subtasks.every(s=>s.completed);
+task.system.lastModified=new Date().toISOString();
+task.system.completedAt=task.completed?new Date().toISOString():null;
+}
+}
 
-      const html = `
-        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-          <div class="max-w-7xl mx-auto">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <div class="flex items-center justify-between mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Task Tracker</h1>
-                <div class="flex gap-2">
-                  <button
-                    onclick="state.showAddTaskModal = true; render();"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                  >
-                    ${icons.plus}
-                    Add Task
-                  </button>
-                  <button
-                    onclick="state.showColumnManager = !state.showColumnManager; render();"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                  >
-                    ${icons.settings}
-                    Manage Columns
-                  </button>
-                </div>
-              </div>
+document.querySelectorAll('.filter-chip').forEach(chip=>{
+chip.onclick=()=>{
+document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+chip.classList.add('active');
+activeFilter=chip.dataset.filter;
+render();
+};
+});
 
-              ${state.showAddTaskModal ? `
-                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add New Task</h2>
-                    
-                    <div class="space-y-4">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Task Name
-                        </label>
-                        <input
-                          type="text"
-                          id="newTaskInput"
-                          value="${state.newTaskName}"
-                          oninput="state.newTaskName = this.value"
-                          onkeypress="if(event.key === 'Enter') addTask()"
-                          placeholder="Enter task name..."
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          autofocus
-                        />
-                      </div>
+document.getElementById('searchBox').oninput=render;
 
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Parent Task (Optional)
-                        </label>
-                        <select
-                          value="${state.selectedParentId || ''}"
-                          onchange="state.selectedParentId = this.value ? parseInt(this.value) : null"
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">None (Top Level Task)</option>
-                          ${parentTaskOptions.map(task => `
-                            <option value="${task.id}" ${state.selectedParentId === task.id ? 'selected' : ''}>
-                              ${task.task}
-                            </option>
-                          `).join('')}
-                        </select>
-                      </div>
-                    </div>
+const modal=document.getElementById('taskModal');
+const closeModal=()=>modal.classList.remove('open');
+document.getElementById('modalClose').onclick=closeModal;
+document.getElementById('cancelBtn').onclick=closeModal;
+modal.onclick=e=>{if(e.target===modal)closeModal();};
+document.onkeydown=e=>{if(e.key==='Escape')closeModal();};
 
-                    <div class="flex gap-3 mt-6">
-                      <button
-                        onclick="addTask()"
-                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-                      >
-                        Create Task
-                      </button>
-                      <button
-                        onclick="state.showAddTaskModal = false; render();"
-                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ` : ''}
+function openModal(task){
+currentTask=task;
+document.getElementById('modalTitle').textContent=task.id&&tasks.includes(task)?'Edit Task':'New Task';
+document.getElementById('mTitle').value=task.title;
+document.getElementById('mProject').value=task.project||'';
+document.getElementById('mIcon').value=task.icon||'📋';
+document.getElementById('mColor').value=task.color||'#3b82f6';
+document.getElementById('mCategory').value=task.category||'';
+document.getElementById('mTags').value=task.tags||'';
+document.getElementById('mStartDate').value=task.startDate||'';
+document.getElementById('mDueDate').value=task.dueDate||'';
+document.getElementById('mStartTime').value=task.startTime||'';
+document.getElementById('mDueTime').value=task.dueTime||'';
+document.getElementById('mRecurrence').value=task.recurrence||'';
+document.getElementById('mEstimate').value=task.estimate||'';
+document.getElementById('mLink').value=task.projectLink||'';
+document.getElementById('mImportance').value=task.importance||'';
+document.getElementById('mImpact').value=task.impactScore||'';
+document.getElementById('mEnergy').value=task.energyMode||'';
+document.getElementById('mFocus').checked=task.focusEligible;
+document.getElementById('mNotes').value=task.notes||'';
+document.getElementById('mLinkedDocs').value=task.linkedDocs||'';
+document.getElementById('mWebClips').value=task.webClips||'';
+document.getElementById('mDeps').value=task.dependencies||'';
+document.getElementById('mBlock').value=task.blockReason||'';
+renderSubtaskList();
+generateAIInsight(task);
+modal.classList.add('open');
+}
 
-              ${state.showColumnManager ? `
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-semibold text-gray-700">Visible Columns</h3>
-                    <button
-                      onclick="state.showAddColumnModal = true; render();"
-                      class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
-                    >
-                      ${icons.plus}
-                      Add Custom Column
-                    </button>
-                  </div>
-                  
-                  <div class="mb-4">
-                    <h4 class="text-sm font-medium text-gray-600 mb-2">Default Columns</h4>
-                    <div class="grid grid-cols-3 gap-2">
-                      ${Object.keys(columnDefinitions).map(col => `
-                        <label class="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            ${state.visibleColumns[col] ? 'checked' : ''}
-                            onchange="toggleColumn('${col}')"
-                            class="rounded"
-                          />
-                          <span class="text-sm">${columnDefinitions[col].label}</span>
-                        </label>
-                      `).join('')}
-                    </div>
-                  </div>
+function renderSubtaskList(){
+const list=document.getElementById('subtaskList');
+if(!currentTask.subtasks||currentTask.subtasks.length===0){
+list.innerHTML='<p style="font-size:11px;color:var(--text-muted);margin-top:10px">No subtasks yet</p>';
+return;
+}
+let html='';
+currentTask.subtasks.forEach((sub,i)=>{
+html+=`<div class="subtask-item" data-idx="${i}">`;
+html+=`<input type="checkbox" class="checkbox modal-sub-check"${sub.completed?' checked':''}>`;
+html+=`<input type="text" class="modal-sub-title" value="${sub.title}">`;
+html+=`<input type="date" class="modal-sub-start" value="${sub.startDate||''}">`;
+html+=`<input type="date" class="modal-sub-due" value="${sub.dueDate||''}">`;
+html+=`<select class="modal-sub-imp"><option value="">—</option><option value="low"${sub.importance==='low'?' selected':''}>Low</option><option value="medium"${sub.importance==='medium'?' selected':''}>Medium</option><option value="high"${sub.importance==='high'?' selected':''}>High</option><option value="critical"${sub.importance==='critical'?' selected':''}>Critical</option></select>`;
+html+=`<input type="number" class="modal-sub-impact" value="${sub.impactScore||''}" min="1" max="10" placeholder="1-10">`;
+html+=`<span style="font-size:10px;color:var(--text-muted);text-align:center">${i+1}</span>`;
+html+=`<button class="subtask-del" data-idx="${i}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+html+=`</div>`;
+});
+list.innerHTML=html;
+list.querySelectorAll('.modal-sub-check').forEach((cb,i)=>{
+cb.onchange=()=>{currentTask.subtasks[i].completed=cb.checked;};
+});
+list.querySelectorAll('.modal-sub-title').forEach((inp,i)=>{
+inp.onchange=()=>{currentTask.subtasks[i].title=inp.value;};
+});
+list.querySelectorAll('.modal-sub-start').forEach((inp,i)=>{
+inp.onchange=()=>{currentTask.subtasks[i].startDate=inp.value;};
+});
+list.querySelectorAll('.modal-sub-due').forEach((inp,i)=>{
+inp.onchange=()=>{currentTask.subtasks[i].dueDate=inp.value;};
+});
+list.querySelectorAll('.modal-sub-imp').forEach((sel,i)=>{
+sel.onchange=()=>{currentTask.subtasks[i].importance=sel.value;};
+});
+list.querySelectorAll('.modal-sub-impact').forEach((inp,i)=>{
+inp.onchange=()=>{currentTask.subtasks[i].impactScore=parseInt(inp.value)||0;};
+});
+list.querySelectorAll('.subtask-del').forEach(btn=>{
+btn.onclick=()=>{
+const idx=parseInt(btn.dataset.idx);
+currentTask.subtasks.splice(idx,1);
+if(currentTask.subtasks.length===0)currentTask.subtasks=null;
+renderSubtaskList();
+};
+});
+}
 
-                  ${state.customColumns.length > 0 ? `
-                    <div>
-                      <h4 class="text-sm font-medium text-gray-600 mb-2">Custom Columns</h4>
-                      <div class="grid grid-cols-3 gap-2">
-                        ${state.customColumns.map(col => `
-                          <div class="flex items-center gap-2">
-                            <label class="flex items-center gap-2 cursor-pointer flex-1">
-                              <input
-                                type="checkbox"
-                                ${state.visibleColumns[col.id] ? 'checked' : ''}
-                                onchange="toggleColumn('${col.id}')"
-                                class="rounded"
-                              />
-                              <span class="text-sm">${col.label}</span>
-                            </label>
-                            <button
-                              onclick="deleteCustomColumn('${col.id}')"
-                              class="text-red-500 hover:text-red-700"
-                            >
-                              ${icons.trashSmall}
-                            </button>
-                          </div>
-                        `).join('')}
-                      </div>
-                    </div>
-                  ` : ''}
-                </div>
-              ` : ''}
+['subTitle','subStart','subDue'].forEach(id=>{
+document.getElementById(id).oninput=()=>{
+document.getElementById('addSubBtn').disabled=!document.getElementById('subTitle').value;
+};
+});
 
-              ${state.showAddColumnModal ? `
-                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Add Custom Column</h2>
-                    
-                    <div class="space-y-4">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Column Name
-                        </label>
-                        <input
-                          type="text"
-                          value="${state.newColumnName}"
-                          oninput="state.newColumnName = this.value"
-                          placeholder="e.g., Customer Name, Budget, etc."
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          autofocus
-                        />
-                      </div>
+document.getElementById('addSubBtn').onclick=()=>{
+const title=document.getElementById('subTitle').value;
+if(!title)return;
+if(!currentTask.subtasks)currentTask.subtasks=[];
+currentTask.subtasks.push(createSubtask({
+title,
+startDate:document.getElementById('subStart').value,
+dueDate:document.getElementById('subDue').value
+}));
+document.getElementById('subTitle').value='';
+document.getElementById('subStart').value='';
+document.getElementById('subDue').value='';
+document.getElementById('addSubBtn').disabled=true;
+renderSubtaskList();
+};
 
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Column Type
-                        </label>
-                        <select
-                          value="${state.newColumnType}"
-                          onchange="state.newColumnType = this.value"
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="text">Text</option>
-                          <option value="number">Number</option>
-                          <option value="date">Date</option>
-                          <option value="time">Time</option>
-                          <option value="url">URL</option>
-                        </select>
-                      </div>
-                    </div>
+function generateAIInsight(task){
+const insight=document.getElementById('aiInsight');
+const text=document.getElementById('aiInsightText');
+const d=computeDerived(task);
+let msg='';
+if(d.label==='overdue'){
+msg=`<strong>⚠️ Overdue Alert:</strong> This task is ${Math.abs(d.daysUntilDue)} day${Math.abs(d.daysUntilDue)>1?'s':''} overdue. Consider breaking it into smaller subtasks or adjusting the deadline.`;
+}else if(task.blockReason){
+msg=`<strong>🚫 Blocked:</strong> "${task.blockReason}". Resolve this dependency to unblock progress.`;
+}else if(task.dependencies){
+msg=`<strong>🔗 Dependencies:</strong> This task depends on tasks [${task.dependencies}]. Ensure dependencies are completed first.`;
+}else if(d.isUrgent&&task.importance==='critical'){
+msg=`<strong>⚡ High Priority:</strong> Critical task due ${d.daysUntilDue===0?'today':d.daysUntilDue===1?'tomorrow':'soon'}. Consider making this your next focus session.`;
+}else if(task.subtasks&&task.subtasks.length>0){
+const done=task.subtasks.filter(s=>s.completed).length;
+const total=task.subtasks.length;
+const pct=Math.round((done/total)*100);
+msg=`<strong>📊 Progress:</strong> ${done}/${total} subtasks complete (${pct}%). ${pct<50?'Consider prioritizing remaining items to maintain momentum.':'Great progress! Keep it up.'}`;
+}else if(task.system.autoPriorityWeight>=7){
+msg=`<strong>🎯 Priority Score:</strong> This task has a high auto-priority weight (${task.system.autoPriorityWeight.toFixed(1)}/10) based on importance, impact, and urgency.`;
+}else if(d.label==='later'&&!task.dueDate){
+msg=`<strong>📅 No Deadline:</strong> Consider adding a due date to improve planning and prioritization.`;
+}
+if(msg){
+text.innerHTML=msg;
+insight.style.display='flex';
+}else{
+insight.style.display='none';
+}
+}
 
-                    <div class="flex gap-3 mt-6">
-                      <button
-                        onclick="addCustomColumn()"
-                        class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
-                      >
-                        Add Column
-                      </button>
-                      <button
-                        onclick="state.showAddColumnModal = false; render();"
-                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ` : ''}
-              
-              <div class="border border-gray-200 rounded-lg overflow-x-auto">
-                <table class="w-full border-collapse">
-                  <thead>
-                    <tr class="bg-gray-100 border-b border-gray-200">
-                      ${visibleCols.map(col => {
-                        const allDefs = getAllColumnDefinitions();
-                        return `
-                          <th class="px-4 py-3 border-r border-gray-200 text-left font-semibold text-gray-700 ${getColumnWidth(col)}">
-                            ${allDefs[col].label}
-                          </th>
-                        `;
-                      }).join('')}
-                      <th class="px-4 py-3 text-center font-semibold text-gray-700 w-20">Actions</th>
-                    </tr>
-                  </thead>
+document.getElementById('saveBtn').onclick=()=>{
+if(!currentTask)return;
+currentTask.title=document.getElementById('mTitle').value||'Untitled';
+currentTask.project=document.getElementById('mProject').value;
+currentTask.icon=document.getElementById('mIcon').value||'📋';
+currentTask.color=document.getElementById('mColor').value;
+currentTask.category=document.getElementById('mCategory').value;
+currentTask.tags=document.getElementById('mTags').value;
+currentTask.startDate=document.getElementById('mStartDate').value;
+currentTask.dueDate=document.getElementById('mDueDate').value;
+currentTask.startTime=document.getElementById('mStartTime').value;
+currentTask.dueTime=document.getElementById('mDueTime').value;
+currentTask.recurrence=document.getElementById('mRecurrence').value;
+currentTask.estimate=parseFloat(document.getElementById('mEstimate').value)||0;
+currentTask.projectLink=document.getElementById('mLink').value;
+currentTask.importance=document.getElementById('mImportance').value;
+currentTask.impactScore=parseInt(document.getElementById('mImpact').value)||0;
+currentTask.energyMode=document.getElementById('mEnergy').value;
+currentTask.focusEligible=document.getElementById('mFocus').checked;
+currentTask.notes=document.getElementById('mNotes').value;
+currentTask.linkedDocs=document.getElementById('mLinkedDocs').value;
+currentTask.webClips=document.getElementById('mWebClips').value;
+currentTask.dependencies=document.getElementById('mDeps').value;
+currentTask.blockReason=document.getElementById('mBlock').value;
+currentTask.system.lastModified=new Date().toISOString();
+currentTask.system.version++;
+checkParentCompletion(currentTask);
+if(!tasks.find(t=>t.id===currentTask.id))tasks.push(currentTask);
+render();
+closeModal();
+currentTask=null;
+};
 
-                  <tbody>
-                    ${state.tasks.length === 0 ? `
-                      <tr>
-                        <td colspan="${visibleCols.length + 1}" class="px-4 py-8 text-center text-gray-400">
-                          No tasks yet. Add one to get started!
-                        </td>
-                      </tr>
-                    ` : parentTasks.map(task => renderTaskRow(task)).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+document.getElementById('deleteBtn').onclick=()=>{
+if(!currentTask||!confirm('Delete this task permanently?'))return;
+tasks=tasks.filter(t=>t.id!==currentTask.id);
+expandedTasks.delete(currentTask.id);
+render();
+closeModal();
+currentTask=null;
+};
 
-      document.getElementById('app').innerHTML = html;
-    }
+document.getElementById('duplicateBtn').onclick=()=>{
+if(!currentTask)return;
+const dup=JSON.parse(JSON.stringify(currentTask));
+const newTask=createTask(dup);
+newTask.title+=' (Copy)';
+newTask.completed=false;
+newTask.system.completedAt=null;
+if(newTask.subtasks)newTask.subtasks.forEach(s=>s.completed=false);
+tasks.push(newTask);
+render();
+closeModal();
+alert('Task duplicated successfully');
+};
 
-    // Make functions globally available
-    window.addTask = addTask;
-    window.updateTask = updateTask;
-    window.deleteTask = deleteTask;
-    window.toggleExpand = toggleExpand;
-    window.toggleColumn = toggleColumn;
-    window.addCustomColumn = addCustomColumn;
-    window.deleteCustomColumn = deleteCustomColumn;
+document.getElementById('addTaskBtn').onclick=()=>{
+const today=new Date().toISOString().split('T')[0];
+const tomorrow=new Date(Date.now()+864e5).toISOString().split('T')[0];
+currentTask=createTask({startDate:today,dueDate:tomorrow});
+openModal(currentTask);
+};
 
-    // Initial render
-    render();
-  </script>
+tasks=[
+createTask({id:1,title:'Q1 Product Strategy',icon:'🎯',color:'#3b82f6',project:'Strategy',category:'Planning',tags:'quarterly,leadership',startDate:'2026-01-10',dueDate:'2026-01-25',dueTime:'17:00',importance:'critical',impactScore:9,estimate:8,projectLink:'https://notion.so/strategy-2026',notes:'Define roadmap priorities for Q1',subtasks:[
+createSubtask({title:'Conduct Market Analysis Report',startDate:'2026-01-10',dueDate:'2026-01-15',completed:true,importance:'high',impactScore:7}),
+createSubtask({title:'Complete Competitive Landscape Review',startDate:'2026-01-12',dueDate:'2026-01-18',importance:'high',impactScore:8}),
+createSubtask({title:'Draft Strategy Presentation Slides',startDate:'2026-01-16',dueDate:'2026-01-22',importance:'medium',impactScore:6}),
+createSubtask({title:'Schedule Leadership Review Meeting',startDate:'2026-01-22',dueDate:'2026-01-25',importance:'medium',impactScore:5})
+]}),
+createTask({id:2,title:'User Research Synthesis',icon:'📊',color:'#8b5cf6',project:'Research',category:'UX',tags:'research,users',startDate:'2026-01-05',dueDate:'2026-01-18',importance:'high',impactScore:7,estimate:6,projectLink:'https://figma.com/research',subtasks:[
+createSubtask({title:'Compile Interview Transcripts',startDate:'2026-01-05',dueDate:'2026-01-08',completed:true,importance:'medium',impactScore:5}),
+createSubtask({title:'Identify Key User Pain Points',startDate:'2026-01-08',dueDate:'2026-01-12',completed:true,importance:'high',impactScore:8}),
+createSubtask({title:'Create Persona Documents',startDate:'2026-01-12',dueDate:'2026-01-15',importance:'medium',impactScore:6}),
+createSubtask({title:'Write Final Research Report',startDate:'2026-01-15',dueDate:'2026-01-18',importance:'high',impactScore:7})
+]}),
+createTask({id:3,title:'Design System Update',icon:'🎨',color:'#22c55e',project:'Design',category:'Engineering',tags:'design,components',startDate:'2026-01-08',dueDate:'2026-01-20',importance:'medium',impactScore:6,estimate:12,projectLink:'https://storybook.company.io',subtasks:[
+createSubtask({title:'Audit Current Color Token Usage',startDate:'2026-01-08',dueDate:'2026-01-12',completed:true,importance:'low',impactScore:4}),
+createSubtask({title:'Define New Typography Scale',startDate:'2026-01-10',dueDate:'2026-01-14',completed:true,importance:'medium',impactScore:6}),
+createSubtask({title:'Update Component Library Docs',startDate:'2026-01-14',dueDate:'2026-01-18',importance:'medium',impactScore:5}),
+createSubtask({title:'Create Migration Guide for Teams',startDate:'2026-01-18',dueDate:'2026-01-20',importance:'high',impactScore:7})
+]}),
+createTask({id:4,title:'API Documentation',icon:'📝',color:'#f59e0b',project:'Engineering',category:'Docs',tags:'api,docs',startDate:'2026-01-01',dueDate:'2026-01-10',importance:'high',impactScore:5,estimate:4,blockReason:'Waiting on API v2 release from backend team',subtasks:[
+createSubtask({title:'Document Authentication Endpoints',startDate:'2026-01-01',dueDate:'2026-01-04',completed:true,importance:'high',impactScore:6}),
+createSubtask({title:'Write CRUD Operation Examples',startDate:'2026-01-04',dueDate:'2026-01-07',importance:'medium',impactScore:5}),
+createSubtask({title:'Add Error Code Reference Table',startDate:'2026-01-07',dueDate:'2026-01-10',importance:'medium',impactScore:4})
+]}),
+createTask({id:5,title:'Team Retrospective',icon:'🔄',color:'#06b6d4',project:'Operations',category:'Team',tags:'team,process',startDate:'2026-01-19',dueDate:'2026-01-19',dueTime:'14:00',importance:'medium',impactScore:4,estimate:2,recurrence:'biweekly'}),
+createTask({id:6,title:'Performance Optimization',icon:'⚡',color:'#ef4444',project:'Engineering',category:'Performance',tags:'speed,core',startDate:'2026-01-15',dueDate:'2026-01-28',importance:'high',impactScore:8,estimate:16,dependencies:'3',projectLink:'https://github.com/company/perf',subtasks:[
+createSubtask({title:'Run Performance Profiling Analysis',startDate:'2026-01-15',dueDate:'2026-01-18',importance:'high',impactScore:7}),
+createSubtask({title:'Optimize JavaScript Bundle Size',startDate:'2026-01-18',dueDate:'2026-01-22',importance:'high',impactScore:8}),
+createSubtask({title:'Improve Component Render Performance',startDate:'2026-01-22',dueDate:'2026-01-26',importance:'medium',impactScore:6}),
+createSubtask({title:'Execute Load Testing & Validation',startDate:'2026-01-26',dueDate:'2026-01-28',importance:'medium',impactScore:7})
+]}),
+createTask({id:7,title:'Weekly Standup Notes',icon:'📋',color:'#64748b',project:'Operations',category:'Admin',tags:'meeting,weekly',startDate:'2026-01-13',dueDate:'2026-01-13',importance:'low',impactScore:2,estimate:0.5,completed:true}),
+createTask({id:8,title:'Client Presentation',icon:'🎤',color:'#ec4899',project:'Sales',category:'Client',tags:'client,demo',startDate:'2026-01-20',dueDate:'2026-01-22',dueTime:'10:00',importance:'critical',impactScore:9,estimate:5,projectLink:'https://slides.company.io/client-demo',subtasks:[
+createSubtask({title:'Prepare Demo Environment Setup',startDate:'2026-01-20',dueDate:'2026-01-20',importance:'critical',impactScore:8}),
+createSubtask({title:'Create Slide Deck with Case Studies',startDate:'2026-01-20',dueDate:'2026-01-21',importance:'high',impactScore:9}),
+createSubtask({title:'Rehearse Presentation Flow',startDate:'2026-01-21',dueDate:'2026-01-22',importance:'medium',impactScore:6})
+]})
+];
+nextId=9;
+expandedTasks.add(1);
+expandedTasks.add(2);
+expandedTasks.add(3);
+expandedTasks.add(6);
+render();
+
+const headerScrollWrap=document.querySelector('.header-scroll-wrap');
+const listBody=document.getElementById('listBody');
+
+let isDragging=false,startX=0,scrollStart=0;
+
+headerScrollWrap.addEventListener('mousedown',e=>{
+e.preventDefault();
+isDragging=true;
+headerScrollWrap.classList.add('dragging');
+document.body.style.userSelect='none';
+startX=e.pageX;
+scrollStart=headerScrollWrap.scrollLeft;
+});
+
+document.addEventListener('mouseup',()=>{
+isDragging=false;
+headerScrollWrap.classList.remove('dragging');
+document.body.style.userSelect='';
+});
+
+document.addEventListener('mousemove',e=>{
+if(!isDragging)return;
+e.preventDefault();
+const dx=e.pageX-startX;
+const newScroll=scrollStart-dx;
+headerScrollWrap.scrollLeft=newScroll;
+document.querySelectorAll('.row-scroll').forEach(row=>{
+row.scrollLeft=newScroll;
+});
+});
+
+let isScrolling=false;
+headerScrollWrap.addEventListener('scroll',()=>{
+if(isDragging)return;
+if(isScrolling)return;
+isScrolling=true;
+const scrollLeft=headerScrollWrap.scrollLeft;
+document.querySelectorAll('.row-scroll').forEach(row=>{
+row.scrollLeft=scrollLeft;
+});
+setTimeout(()=>isScrolling=false,10);
+});
+</script>
 </body>
 </html>
