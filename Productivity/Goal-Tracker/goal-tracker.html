@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulsar — Goals</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#09090b;--s1:#111113;--s2:#161618;--s3:#1c1c1f;--s4:#242427;--s5:#2c2c30;
+--bd:#1e1e22;--bl:#28282d;--bh:#38383e;
+--t1:#f0f0f2;--t2:#a0a0a8;--t3:#6c6c74;--t4:#48484f;
+--ac:#c4a44a;--ac2:#d4b85a;--acd:rgba(196,164,74,.08);--acm:rgba(196,164,74,.16);--acs:rgba(196,164,74,.28);
+--g:#34d399;--gd:rgba(52,211,153,.1);--gb:rgba(52,211,153,.25);
+--r:#f87171;--rd2:rgba(248,113,113,.08);--rb:rgba(248,113,113,.2);
+--bl2:#818cf8;--bld:rgba(129,140,248,.08);
+--am:#fbbf24;--amd:rgba(251,191,36,.08);
+--radius:8px;--rl:12px;
+--f:'Outfit',system-ui,sans-serif;--m:'JetBrains Mono',ui-monospace,monospace;
+--sh:0 8px 32px rgba(0,0,0,.45);--sh-sm:0 2px 8px rgba(0,0,0,.3);
+}
+html{height:100%;background:var(--bg);color:var(--t1);font-family:var(--f);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;display:flex;flex-direction:column}
+
+/* ═══ Header ═══ */
+.hdr{padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;background:rgba(9,9,11,.92);backdrop-filter:blur(16px)}
+.hdr-l{display:flex;align-items:center;gap:14px}
+.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#c4a44a,#d4b85a,#e8cc6e);display:grid;place-items:center;font-size:12px;font-weight:700;color:#000;box-shadow:0 2px 10px rgba(196,164,74,.3)}
+.hdr h1{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.hdr h1 em{font-style:normal;color:var(--t4);font-weight:400;margin-left:8px;font-size:12px}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.btn-add{background:var(--ac);color:#000;border:none;border-radius:var(--radius);padding:7px 16px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f);transition:all .15s;letter-spacing:.2px}
+.btn-add:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,164,74,.3)}
+.filter-bar{display:flex;gap:4px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius);padding:3px}
+.filter-bar button{background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--f);transition:all .1s;letter-spacing:.2px}
+.filter-bar button:hover{color:var(--t2);background:var(--s3)}
+.filter-bar button.active{color:var(--ac);background:var(--acd)}
+
+/* ═══ Main ═══ */
+.main{flex:1;display:grid;grid-template-columns:1fr 300px;gap:0;min-height:0}
+.goal-list{padding:24px 32px;overflow-y:auto;border-right:1px solid var(--bd)}
+.sidebar{padding:24px 20px;overflow-y:auto;background:var(--s1)}
+
+/* ═══ Empty ═══ */
+.empty{display:flex;flex-direction:column;align-items:center;padding:80px 20px;text-align:center}
+.empty-i{font-size:44px;margin-bottom:18px;opacity:.6}
+.empty h2{font-size:17px;font-weight:600;margin-bottom:8px}
+.empty p{font-size:13px;color:var(--t3);max-width:300px;line-height:1.55;margin-bottom:24px}
+.empty button{background:var(--ac);color:#000;border:none;border-radius:var(--radius);padding:9px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f)}
+
+/* ═══ Goal Card ═══ */
+.g-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 20px;margin-bottom:10px;transition:all .12s;position:relative;cursor:default}
+.g-card:hover{border-color:var(--bl);background:var(--s3)}
+.g-card.completed{opacity:.55}
+.g-card.completed:hover{opacity:.7}
+.g-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.g-title-area{flex:1;min-width:0}
+.g-title{font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--t1);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.g-title .g-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--bl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.g-title .g-check:hover{border-color:var(--g);background:var(--gd)}
+.g-title .g-check.checked{border-color:var(--g);background:var(--g)}
+.g-title .g-check.checked svg{opacity:1}
+.g-title .g-check svg{width:10px;height:10px;opacity:0;transition:opacity .12s}
+.g-card.completed .g-title-text{text-decoration:line-through;color:var(--t3)}
+.g-title-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-desc{font-size:11.5px;color:var(--t3);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.g-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.g-tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;padding:3px 8px;border-radius:4px;font-family:var(--m)}
+.g-tag.health{background:var(--gd);color:var(--g)}
+.g-tag.work{background:var(--bld);color:var(--bl2)}
+.g-tag.personal{background:var(--amd);color:var(--am)}
+.g-tag.learning{background:rgba(196,164,74,.1);color:var(--ac2)}
+.g-tag.finance{background:var(--gd);color:var(--g)}
+.g-tag.creative{background:rgba(168,85,247,.1);color:#a855f7}
+.g-priority{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 7px;border-radius:4px;font-family:var(--m)}
+.g-priority.high{background:var(--rd2);color:var(--r)}
+.g-priority.medium{background:var(--amd);color:var(--am)}
+.g-priority.low{background:var(--gd);color:var(--g)}
+.g-date{font-size:9px;color:var(--t4);font-family:var(--m);display:flex;align-items:center;gap:4px}
+.g-date.overdue{color:var(--r)}
+.g-date.soon{color:var(--am)}
+
+/* Progress bar */
+.g-prog{margin-top:12px}
+.g-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.g-prog-lbl{font-size:9px;color:var(--t4);font-family:var(--m);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.g-prog-pct{font-size:11px;font-weight:600;font-family:var(--m);color:var(--t2)}
+.g-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
+.g-fill{height:100%;border-radius:2px;transition:width .35s cubic-bezier(.4,0,.2,1);background:var(--ac)}
+.g-fill.full{background:var(--g)}
+
+/* Sub-goals */
+.g-subs{margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
+.g-sub-toggle{background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:5px;padding:0;margin-bottom:8px;transition:color .1s}
+.g-sub-toggle:hover{color:var(--t2)}
+.g-sub-toggle .arrow{transition:transform .15s;font-size:8px}
+.g-sub-toggle .arrow.open{transform:rotate(90deg)}
+.g-sub-list{display:flex;flex-direction:column;gap:4px}
+.g-sub-list.collapsed{display:none}
+.g-sub{display:flex;align-items:center;gap:8px;padding:5px 0 5px 4px;border-left:2px solid var(--bd);padding-left:12px;transition:border-color .1s}
+.g-sub:hover{border-color:var(--bl)}
+.g-sub .sub-ck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--bl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
+.g-sub .sub-ck:hover{border-color:var(--g);background:var(--gd)}
+.g-sub .sub-ck.checked{border-color:var(--g);background:var(--g)}
+.g-sub .sub-ck.checked svg{opacity:1}
+.g-sub .sub-ck svg{width:8px;height:8px;opacity:0;transition:opacity .1s}
+.g-sub .sub-name{font-size:12px;color:var(--t2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-sub .sub-name.done{text-decoration:line-through;color:var(--t4)}
+
+/* Card actions */
+.g-actions{position:absolute;top:14px;right:14px;display:flex;gap:4px;opacity:0;transition:opacity .1s}
+.g-card:hover .g-actions{opacity:1}
+.g-actions button{background:var(--s4);border:1px solid var(--bd);color:var(--t3);width:26px;height:26px;border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:11px;transition:all .1s}
+.g-actions button:hover{background:var(--s5);color:var(--t1);border-color:var(--bl)}
+
+/* Add sub-goal inline */
+.add-sub{display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:4px}
+.add-sub input{flex:1;background:var(--s4);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t1);font-size:11px;font-family:var(--f);outline:none}
+.add-sub input:focus{border-color:var(--ac)}
+.add-sub button{background:var(--ac);color:#000;border:none;border-radius:5px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
+
+/* ═══ Sidebar ═══ */
+.sb-section{margin-bottom:24px}
+.sb-title{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+
+/* Radial progress */
+.radial-wrap{display:flex;justify-content:center;margin-bottom:16px}
+.radial{position:relative;width:120px;height:120px}
+.radial svg{transform:rotate(-90deg)}
+.radial-bg{fill:none;stroke:var(--s4);stroke-width:8}
+.radial-fill{fill:none;stroke:var(--ac);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
+.radial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.radial-pct{font-size:28px;font-weight:700;font-family:var(--m);letter-spacing:-1px;color:var(--t1)}
+.radial-sub{font-size:9px;color:var(--t4);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* Stat rows */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
+.stat-row:last-child{border-bottom:none}
+.stat-lbl{font-size:11px;color:var(--t3);font-weight:400;display:flex;align-items:center;gap:6px}
+.stat-lbl .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.stat-val{font-size:12px;font-weight:600;font-family:var(--m);color:var(--t1)}
+
+/* Deadline list */
+.dl-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.dl-item:last-child{border-bottom:none}
+.dl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dl-info{flex:1;min-width:0}
+.dl-name{font-size:11px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-date{font-size:9px;color:var(--t4);font-family:var(--m)}
+.dl-date.overdue{color:var(--r)}
+.dl-date.soon{color:var(--am)}
+
+/* ═══ Modal ═══ */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .12s;backdrop-filter:blur(6px)}
+.mo.open{opacity:1;pointer-events:auto}
+.mbox{background:var(--s2);border:1px solid var(--bl);border-radius:var(--rl);padding:28px;width:440px;max-height:85vh;overflow-y:auto;transform:scale(.94);transition:transform .15s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh)}
+.mo.open .mbox{transform:scale(1)}
+.mbox h2{font-size:16px;font-weight:600;margin-bottom:22px;letter-spacing:-.2px}
+.mbox label{display:block;font-size:9px;color:var(--t4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.mbox input,.mbox textarea,.mbox select{width:100%;background:var(--s4);border:1px solid var(--bd);border-radius:6px;padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;margin-bottom:14px;transition:border-color .12s;resize:none}
+.mbox input:focus,.mbox textarea:focus,.mbox select:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acd)}
+.mbox textarea{height:70px;line-height:1.45}
+.mbox select{cursor:pointer;-webkit-appearance:none;appearance:none}
+.mbox .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.macts{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.macts button{padding:8px 22px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f);border:none;transition:all .12s}
+.macts .bc{background:var(--s4);color:var(--t2)}
+.macts .bc:hover{background:var(--s5)}
+.macts .bs{background:var(--ac);color:#000}
+.macts .bs:hover{filter:brightness(1.1)}
+
+/* Slider */
+.slider-wrap{margin-bottom:14px}
+.slider-wrap input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;background:var(--s4);border-radius:2px;outline:none;margin-top:6px}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);cursor:pointer;border:2px solid var(--bg);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.slider-val{font-size:12px;font-family:var(--m);font-weight:600;color:var(--ac);float:right;margin-top:-18px}
+
+/* ═══ Undo ═══ */
+.undo{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--s3);border:1px solid var(--bl);border-radius:var(--rl);padding:9px 16px;font-size:11px;color:var(--t2);display:flex;align-items:center;gap:12px;z-index:500;transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh)}
+.undo.show{transform:translateX(-50%) translateY(0)}
+.undo button{background:var(--ac);color:#000;border:none;border-radius:5px;padding:4px 12px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
+
+/* ═══ Scrollbar ═══ */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+
+/* ═══ Animations ═══ */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+.g-card{animation:fadeIn .2s ease both}
+
+@media(max-width:900px){
+  .main{grid-template-columns:1fr}
+  .sidebar{border-top:1px solid var(--bd);border-right:none}
+  .goal-list{border-right:none}
+}
+@media(max-width:600px){
+  .hdr{padding:12px 16px}
+  .goal-list{padding:16px}
+  .sidebar{padding:16px}
+  .filter-bar{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l"><div class="logo">P</div><h1>Goals<em>tracker</em></h1></div>
+  <div class="hdr-r">
+    <div class="filter-bar" id="filters">
+      <button class="active" onclick="setFilter('all',this)">All</button>
+      <button onclick="setFilter('active',this)">Active</button>
+      <button onclick="setFilter('completed',this)">Done</button>
+      <button onclick="setFilter('high',this)">High ⚡</button>
+    </div>
+    <button class="btn-add" onclick="openMo()">+ New goal</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="goal-list" id="goalList"></div>
+  <div class="sidebar" id="sidebar"></div>
+</div>
+
+<div class="undo" id="undoT"><span id="undoM"></span><button onclick="doUndo()">Undo</button></div>
+
+<div class="mo" id="mo" onclick="if(event.target===this)closeMo()">
+  <div class="mbox">
+    <h2 id="moTi">New goal</h2>
+    <label>Title</label>
+    <input id="gTitle" placeholder="e.g. Ship Pulsar v1" maxlength="60">
+    <label>Description</label>
+    <textarea id="gDesc" placeholder="What does success look like?"></textarea>
+    <div class="row">
+      <div><label>Category</label><select id="gCat">
+        <option value="work">Work</option><option value="personal">Personal</option><option value="health">Health</option>
+        <option value="learning">Learning</option><option value="finance">Finance</option><option value="creative">Creative</option>
+      </select></div>
+      <div><label>Priority</label><select id="gPri">
+        <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+      </select></div>
+    </div>
+    <div class="row">
+      <div><label>Start date</label><input type="date" id="gStart"></div>
+      <div><label>End date</label><input type="date" id="gEnd"></div>
+    </div>
+    <div class="slider-wrap">
+      <label>Progress</label>
+      <span class="slider-val" id="sliderVal">0%</span>
+      <input type="range" id="gProg" min="0" max="100" value="0" oninput="document.getElementById('sliderVal').textContent=this.value+'%'">
+    </div>
+    <div class="macts"><button class="bc" onclick="closeMo()">Cancel</button><button class="bs" onclick="saveGoal()">Save</button></div>
+  </div>
+</div>
+
+<script>
+const SK='pulsar_goals_v1';
+let S={goals:[]},editId=null,filter='all',undoStack=[];
+
+// ═══ Persistence ═══
+function save(){localStorage.setItem(SK,JSON.stringify(S))}
+function load(){const r=localStorage.getItem(SK);if(r){try{S=JSON.parse(r)}catch(e){seed()}}else seed()}
+
+function gid(){return 'g_'+Math.random().toString(36).slice(2,9)}
+
+function seed(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  S={goals:[
+    {id:gid(),title:'Ship Pulsar v1',desc:'Complete core modules: habits, goals, tasks, and knowledge base. Deploy to production.',cat:'work',pri:'high',progress:65,start:fmt(new Date(y,m,1)),end:fmt(new Date(y,m+1,15)),subs:[
+      {id:gid(),name:'Habit tracker module',done:true},
+      {id:gid(),name:'Goal tracker module',done:false},
+      {id:gid(),name:'Task management',done:false},
+      {id:gid(),name:'Knowledge base',done:false},
+      {id:gid(),name:'Deploy & QA',done:false}
+    ],collapsed:false,completed:false},
+    {id:gid(),title:'Read 12 books this year',desc:'One book per month across different genres.',cat:'learning',pri:'medium',progress:33,start:fmt(new Date(y,0,1)),end:fmt(new Date(y,11,31)),subs:[
+      {id:gid(),name:'Q1: 3 books',done:true},
+      {id:gid(),name:'Q2: 3 books',done:true},
+      {id:gid(),name:'Q3: 3 books',done:false},
+      {id:gid(),name:'Q4: 3 books',done:false}
+    ],collapsed:true,completed:false},
+    {id:gid(),title:'Run a half marathon',desc:'Train consistently and complete a half marathon by end of summer.',cat:'health',pri:'high',progress:40,start:fmt(new Date(y,m-2,1)),end:fmt(new Date(y,7,31)),subs:[
+      {id:gid(),name:'Build base mileage (20mpw)',done:true},
+      {id:gid(),name:'Complete 10K race',done:true},
+      {id:gid(),name:'Peak training block',done:false},
+      {id:gid(),name:'Race day',done:false}
+    ],collapsed:true,completed:false},
+    {id:gid(),title:'Emergency fund: 6 months',desc:'Save 6 months of expenses in liquid savings.',cat:'finance',pri:'medium',progress:80,start:fmt(new Date(y,0,1)),end:fmt(new Date(y,11,31)),subs:[],collapsed:true,completed:false},
+    {id:gid(),title:'Learn Rust basics',desc:'Complete the Rust Book and build a CLI tool.',cat:'learning',pri:'low',progress:15,start:fmt(new Date(y,m,1)),end:fmt(new Date(y,m+3,1)),subs:[
+      {id:gid(),name:'Chapters 1-8',done:true},
+      {id:gid(),name:'Chapters 9-15',done:false},
+      {id:gid(),name:'Build CLI project',done:false}
+    ],collapsed:true,completed:false}
+  ]};
+  save();
+}
+
+function fmt(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function parseD(s){if(!s)return null;const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function daysLeft(end){if(!end)return null;const e=parseD(end),n=new Date();n.setHours(0,0,0,0);return Math.ceil((e-n)/(1000*60*60*24))}
+function fmtDate(s){if(!s)return '';const d=parseD(s);return d.toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}
+function fmtShort(s){if(!s)return '';const d=parseD(s);return d.toLocaleDateString('en',{month:'short',day:'numeric'})}
+
+// ═══ Undo ═══
+function pushU(msg,fn){undoStack.push({msg,fn});const t=document.getElementById('undoT');document.getElementById('undoM').textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500)}
+function doUndo(){if(!undoStack.length)return;undoStack.pop().fn();save();render();document.getElementById('undoT').classList.remove('show')}
+
+// ═══ Filter ═══
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function filtered(){
+  return S.goals.filter(g=>{
+    if(filter==='active')return !g.completed;
+    if(filter==='completed')return g.completed;
+    if(filter==='high')return g.pri==='high'&&!g.completed;
+    return true;
+  });
+}
+
+// ═══ Render ═══
+function render(){
+  renderGoals();
+  renderSidebar();
+}
+
+function renderGoals(){
+  const gl=document.getElementById('goalList'),goals=filtered();
+  if(!S.goals.length){
+    gl.innerHTML=`<div class="empty"><div class="empty-i">🎯</div><h2>Set your first goal</h2><p>Define what you want to achieve, break it into milestones, and track your progress over time.</p><button onclick="openMo()">+ New goal</button></div>`;
+    return;
+  }
+  if(!goals.length){
+    gl.innerHTML=`<div class="empty"><div class="empty-i">🔍</div><h2>No goals match</h2><p>Try a different filter.</p></div>`;
+    return;
+  }
+  let h='';
+  goals.forEach((g,gi)=>{
+    const dl=daysLeft(g.end),overdue=dl!==null&&dl<0,soon=dl!==null&&dl>=0&&dl<=7;
+    const subsDone=g.subs?g.subs.filter(s=>s.done).length:0;
+    const subsTotal=g.subs?g.subs.length:0;
+    const pct=g.completed?100:g.progress;
+    const fillCls=pct>=100?'full':'';
+
+    h+=`<div class="g-card${g.completed?' completed':''}" data-id="${g.id}" style="animation-delay:${gi*30}ms">
+      <div class="g-actions">
+        <button onclick="editGoal('${g.id}')" title="Edit">✏️</button>
+        <button onclick="delGoal('${g.id}')" title="Delete">🗑</button>
+      </div>
+      <div class="g-top">
+        <div class="g-title-area">
+          <div class="g-title">
+            <span class="g-check${g.completed?' checked':''}" onclick="toggleComplete('${g.id}')">
+              <svg viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><polyline points="2.5 6 5 8.5 9.5 3.5"/></svg>
+            </span>
+            <span class="g-title-text">${esc(g.title)}</span>
+          </div>
+          ${g.desc?`<div class="g-desc">${esc(g.desc)}</div>`:''}
+          <div class="g-meta">
+            <span class="g-tag ${g.cat}">${g.cat}</span>
+            <span class="g-priority ${g.pri}">${g.pri}</span>
+            ${g.end?`<span class="g-date${overdue?' overdue':''}${soon?' soon':''}">📅 ${fmtShort(g.end)}${overdue?' · overdue':soon?' · '+dl+'d left':''}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="g-prog">
+        <div class="g-prog-top"><span class="g-prog-lbl">Progress</span><span class="g-prog-pct">${pct}%</span></div>
+        <div class="g-bar"><div class="g-fill ${fillCls}" style="width:${pct}%"></div></div>
+      </div>`;
+
+    // Sub-goals
+    if(subsTotal>0){
+      const coll=g.collapsed;
+      h+=`<div class="g-subs">
+        <button class="g-sub-toggle" onclick="toggleCollapse('${g.id}')">
+          <span class="arrow${coll?'':' open'}">▶</span> ${subsDone}/${subsTotal} milestones
+        </button>
+        <div class="g-sub-list${coll?' collapsed':''}">`;
+      g.subs.forEach(s=>{
+        h+=`<div class="g-sub">
+          <span class="sub-ck${s.done?' checked':''}" onclick="toggleSub('${g.id}','${s.id}')">
+            <svg viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><polyline points="2.5 6 5 8.5 9.5 3.5"/></svg>
+          </span>
+          <span class="sub-name${s.done?' done':''}">${esc(s.name)}</span>
+        </div>`;
+      });
+      h+=`</div>
+        <div class="add-sub">
+          <input placeholder="Add milestone..." onkeydown="if(event.key==='Enter')addSub('${g.id}',this)">
+          <button onclick="addSub('${g.id}',this.previousElementSibling)">+</button>
+        </div>
+      </div>`;
+    } else {
+      h+=`<div class="g-subs" style="border-top:none;padding-top:6px">
+        <div class="add-sub" style="padding-left:0">
+          <input placeholder="Add milestone..." onkeydown="if(event.key==='Enter')addSub('${g.id}',this)">
+          <button onclick="addSub('${g.id}',this.previousElementSibling)">+</button>
+        </div>
+      </div>`;
+    }
+    h+=`</div>`;
+  });
+  gl.innerHTML=h;
+}
+
+function renderSidebar(){
+  const sb=document.getElementById('sidebar');
+  const total=S.goals.length,done=S.goals.filter(g=>g.completed).length,active=total-done;
+  const avgProg=total?Math.round(S.goals.reduce((a,g)=>a+(g.completed?100:g.progress),0)/total):0;
+  const circ=2*Math.PI*52;
+  const offset=circ-(circ*avgProg/100);
+
+  // Upcoming deadlines
+  const upcoming=S.goals.filter(g=>!g.completed&&g.end).sort((a,b)=>parseD(a.end)-parseD(b.end)).slice(0,5);
+
+  let h=`<div class="sb-section">
+    <div class="sb-title">Overall progress</div>
+    <div class="radial-wrap">
+      <div class="radial">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="radial-bg" cx="60" cy="60" r="52"/>
+          <circle class="radial-fill" cx="60" cy="60" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+        </svg>
+        <div class="radial-center">
+          <span class="radial-pct">${avgProg}%</span>
+          <span class="radial-sub">Average</span>
+        </div>
+      </div>
+    </div>
+    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--ac)"></span>Total goals</span><span class="stat-val">${total}</span></div>
+    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--bl2)"></span>Active</span><span class="stat-val">${active}</span></div>
+    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--g)"></span>Completed</span><span class="stat-val">${done}</span></div>
+    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--r)"></span>High priority</span><span class="stat-val">${S.goals.filter(g=>g.pri==='high'&&!g.completed).length}</span></div>
+  </div>`;
+
+  if(upcoming.length){
+    h+=`<div class="sb-section"><div class="sb-title">Upcoming deadlines</div>`;
+    upcoming.forEach(g=>{
+      const dl=daysLeft(g.end),ov=dl<0,sn=dl>=0&&dl<=7;
+      h+=`<div class="dl-item">
+        <span class="dl-dot" style="background:${ov?'var(--r)':sn?'var(--am)':'var(--t4)'}"></span>
+        <div class="dl-info">
+          <div class="dl-name">${esc(g.title)}</div>
+          <div class="dl-date${ov?' overdue':''}${sn?' soon':''}">${fmtShort(g.end)}${ov?' · overdue':sn?' · '+dl+'d left':''}</div>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  sb.innerHTML=h;
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ═══ Actions ═══
+function toggleComplete(id){
+  const g=S.goals.find(x=>x.id===id);if(!g)return;
+  const prev=g.completed;
+  g.completed=!g.completed;
+  if(g.completed)g.progress=100;
+  else g.progress=prev?0:g.progress;
+  save();render();
+}
+
+function toggleCollapse(id){
+  const g=S.goals.find(x=>x.id===id);if(!g)return;
+  g.collapsed=!g.collapsed;save();render();
+}
+
+function toggleSub(gid,sid){
+  const g=S.goals.find(x=>x.id===gid);if(!g)return;
+  const s=g.subs.find(x=>x.id===sid);if(!s)return;
+  s.done=!s.done;
+  // Auto-update progress based on subs
+  if(g.subs.length){
+    g.progress=Math.round(g.subs.filter(x=>x.done).length/g.subs.length*100);
+    if(g.progress>=100)g.completed=true;
+  }
+  save();render();
+}
+
+function addSub(gid,input){
+  const name=input.value.trim();if(!name)return;
+  const g=S.goals.find(x=>x.id===gid);if(!g)return;
+  if(!g.subs)g.subs=[];
+  g.subs.push({id:gid+Math.random().toString(36).slice(2,6),name,done:false});
+  g.collapsed=false;
+  // Recalc progress
+  g.progress=Math.round(g.subs.filter(x=>x.done).length/g.subs.length*100);
+  input.value='';save();render();
+}
+
+function delGoal(id){
+  const prev=JSON.parse(JSON.stringify(S.goals));
+  const nm=S.goals.find(g=>g.id===id)?.title||'';
+  S.goals=S.goals.filter(g=>g.id!==id);
+  save();render();
+  pushU(`Deleted "${nm}"`,()=>{S.goals=prev});
+}
+
+function editGoal(id){
+  const g=S.goals.find(x=>x.id===id);if(!g)return;
+  editId=id;
+  document.getElementById('moTi').textContent='Edit goal';
+  document.getElementById('gTitle').value=g.title;
+  document.getElementById('gDesc').value=g.desc||'';
+  document.getElementById('gCat').value=g.cat;
+  document.getElementById('gPri').value=g.pri;
+  document.getElementById('gStart').value=g.start||'';
+  document.getElementById('gEnd').value=g.end||'';
+  document.getElementById('gProg').value=g.progress;
+  document.getElementById('sliderVal').textContent=g.progress+'%';
+  document.getElementById('mo').classList.add('open');
+}
+
+// ═══ Modal ═══
+function openMo(){
+  editId=null;
+  document.getElementById('moTi').textContent='New goal';
+  document.getElementById('gTitle').value='';
+  document.getElementById('gDesc').value='';
+  document.getElementById('gCat').value='work';
+  document.getElementById('gPri').value='medium';
+  document.getElementById('gStart').value=fmt(new Date());
+  document.getElementById('gEnd').value='';
+  document.getElementById('gProg').value=0;
+  document.getElementById('sliderVal').textContent='0%';
+  document.getElementById('mo').classList.add('open');
+  setTimeout(()=>document.getElementById('gTitle').focus(),100);
+}
+function closeMo(){document.getElementById('mo').classList.remove('open')}
+
+function saveGoal(){
+  const title=document.getElementById('gTitle').value.trim();if(!title)return;
+  const data={
+    title,
+    desc:document.getElementById('gDesc').value.trim(),
+    cat:document.getElementById('gCat').value,
+    pri:document.getElementById('gPri').value,
+    start:document.getElementById('gStart').value,
+    end:document.getElementById('gEnd').value,
+    progress:+document.getElementById('gProg').value
+  };
+  if(editId){
+    const g=S.goals.find(x=>x.id===editId);
+    if(g)Object.assign(g,data);
+  }else{
+    S.goals.unshift({id:gid(),...data,subs:[],collapsed:false,completed:data.progress>=100});
+  }
+  save();closeMo();render();
+}
+
+// ═══ Keys ═══
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeMo();
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo()}
+});
+
+// ═══ Init ═══
+load();render();
+</script>
+</body>
+</html>
