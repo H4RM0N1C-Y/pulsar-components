@@ -4,79 +4,148 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pulsar — Goals</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
---bg:#09090b;--s1:#111113;--s2:#161618;--s3:#1c1c1f;--s4:#242427;--s5:#2c2c30;
---bd:#1e1e22;--bl:#28282d;--bh:#38383e;
---t1:#f0f0f2;--t2:#a0a0a8;--t3:#6c6c74;--t4:#48484f;
---ac:#c4a44a;--ac2:#d4b85a;--acd:rgba(196,164,74,.08);--acm:rgba(196,164,74,.16);--acs:rgba(196,164,74,.28);
---g:#34d399;--gd:rgba(52,211,153,.1);--gb:rgba(52,211,153,.25);
---r:#f87171;--rd2:rgba(248,113,113,.08);--rb:rgba(248,113,113,.2);
---bl2:#818cf8;--bld:rgba(129,140,248,.08);
---am:#fbbf24;--amd:rgba(251,191,36,.08);
---radius:8px;--rl:12px;
---f:'Outfit',system-ui,sans-serif;--m:'JetBrains Mono',ui-monospace,monospace;
---sh:0 8px 32px rgba(0,0,0,.45);--sh-sm:0 2px 8px rgba(0,0,0,.3);
+  /* Pulsar palette */
+  --bg:#0a0a0f;
+  --s1:#0f0f17;
+  --s2:#13131e;
+  --s3:#191926;
+  --s4:#1f1f2e;
+  --s5:#272736;
+  --bd:#1e1e30;
+  --bl:#2a2a40;
+  --bh:#3a3a55;
+
+  --t1:#e8e8f0;
+  --t2:#9898b8;
+  --t3:#5a5a7a;
+  --t4:#3a3a55;
+
+  --ac:#7c6af7;
+  --ac2:#9d8fff;
+  --acd:rgba(124,106,247,.08);
+  --acm:rgba(124,106,247,.16);
+  --acs:rgba(124,106,247,.3);
+  --ac-glow:rgba(124,106,247,.2);
+
+  --g:#34d399;
+  --gd:rgba(52,211,153,.1);
+  --gb:rgba(52,211,153,.25);
+  --r:#f87171;
+  --rd:rgba(248,113,113,.08);
+  --rb:rgba(248,113,113,.2);
+  --am:#fbbf24;
+  --amd:rgba(251,191,36,.08);
+  --bl2:#818cf8;
+  --bld:rgba(129,140,248,.1);
+
+  --radius:8px;--rl:12px;
+  --f:'Outfit',system-ui,sans-serif;
+  --m:'JetBrains Mono',ui-monospace,monospace;
+  --sh:0 8px 32px rgba(0,0,0,.55);
 }
+
 html{height:100%;background:var(--bg);color:var(--t1);font-family:var(--f);-webkit-font-smoothing:antialiased}
 body{min-height:100vh;display:flex;flex-direction:column}
 
+/* ═══ Lucide icon helper ═══ */
+.icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon svg{stroke-width:1.75}
+
 /* ═══ Header ═══ */
-.hdr{padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;background:rgba(9,9,11,.92);backdrop-filter:blur(16px)}
-.hdr-l{display:flex;align-items:center;gap:14px}
-.logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#c4a44a,#d4b85a,#e8cc6e);display:grid;place-items:center;font-size:12px;font-weight:700;color:#000;box-shadow:0 2px 10px rgba(196,164,74,.3)}
+.hdr{
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;
+  background:rgba(10,10,15,.9);backdrop-filter:blur(20px);
+}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.logo{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,#7c6af7,#9d8fff,#c4b5fd);
+  display:grid;place-items:center;
+  box-shadow:0 0 16px rgba(124,106,247,.4);
+}
+.logo svg{color:#fff}
 .hdr h1{font-size:15px;font-weight:600;letter-spacing:-.3px}
-.hdr h1 em{font-style:normal;color:var(--t4);font-weight:400;margin-left:8px;font-size:12px}
+.hdr h1 em{font-style:normal;color:var(--t4);font-weight:400;margin-left:8px;font-size:12px;font-family:var(--m)}
 .hdr-r{display:flex;align-items:center;gap:8px}
-.btn-add{background:var(--ac);color:#000;border:none;border-radius:var(--radius);padding:7px 16px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f);transition:all .15s;letter-spacing:.2px}
-.btn-add:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,164,74,.3)}
-.filter-bar{display:flex;gap:4px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius);padding:3px}
-.filter-bar button{background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--f);transition:all .1s;letter-spacing:.2px}
+.btn-add{
+  background:var(--ac);color:#fff;border:none;border-radius:var(--radius);
+  padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f);
+  transition:all .15s;letter-spacing:.2px;display:flex;align-items:center;gap:5px;
+  box-shadow:0 2px 12px var(--ac-glow);
+}
+.btn-add:hover{background:var(--ac2);transform:translateY(-1px);box-shadow:0 4px 20px var(--acs)}
+.filter-bar{display:flex;gap:3px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius);padding:3px}
+.filter-bar button{
+  background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;
+  padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--f);transition:all .12s;letter-spacing:.2px;
+}
 .filter-bar button:hover{color:var(--t2);background:var(--s3)}
-.filter-bar button.active{color:var(--ac);background:var(--acd)}
+.filter-bar button.active{color:var(--ac2);background:var(--acd);box-shadow:inset 0 0 0 1px var(--acm)}
 
 /* ═══ Main ═══ */
 .main{flex:1;display:grid;grid-template-columns:1fr 300px;gap:0;min-height:0}
-.goal-list{padding:24px 32px;overflow-y:auto;border-right:1px solid var(--bd)}
-.sidebar{padding:24px 20px;overflow-y:auto;background:var(--s1)}
+.goal-list{padding:24px 28px;overflow-y:auto;border-right:1px solid var(--bd)}
+.sidebar{padding:24px 18px;overflow-y:auto;background:var(--s1)}
 
 /* ═══ Empty ═══ */
 .empty{display:flex;flex-direction:column;align-items:center;padding:80px 20px;text-align:center}
-.empty-i{font-size:44px;margin-bottom:18px;opacity:.6}
+.empty-i{width:48px;height:48px;border-radius:12px;background:var(--s3);border:1px solid var(--bd);display:grid;place-items:center;margin:0 auto 18px;color:var(--t4)}
 .empty h2{font-size:17px;font-weight:600;margin-bottom:8px}
 .empty p{font-size:13px;color:var(--t3);max-width:300px;line-height:1.55;margin-bottom:24px}
-.empty button{background:var(--ac);color:#000;border:none;border-radius:var(--radius);padding:9px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.empty button{
+  background:var(--ac);color:#fff;border:none;border-radius:var(--radius);
+  padding:9px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);
+  display:inline-flex;align-items:center;gap:6px;
+}
 
 /* ═══ Goal Card ═══ */
-.g-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 20px;margin-bottom:10px;transition:all .12s;position:relative;cursor:default}
+.g-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:var(--rl);
+  padding:18px 20px;margin-bottom:10px;transition:all .12s;position:relative;cursor:default;
+}
 .g-card:hover{border-color:var(--bl);background:var(--s3)}
 .g-card.completed{opacity:.55}
 .g-card.completed:hover{opacity:.7}
+
 .g-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
 .g-title-area{flex:1;min-width:0}
-.g-title{font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--t1);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.g-title .g-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--bl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
-.g-title .g-check:hover{border-color:var(--g);background:var(--gd)}
-.g-title .g-check.checked{border-color:var(--g);background:var(--g)}
-.g-title .g-check.checked svg{opacity:1}
-.g-title .g-check svg{width:10px;height:10px;opacity:0;transition:opacity .12s}
+.g-title{
+  font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--t1);
+  margin-bottom:4px;display:flex;align-items:center;gap:8px;
+}
+.g-check{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--bl);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;
+}
+.g-check:hover{border-color:var(--g);background:var(--gd)}
+.g-check.checked{border-color:var(--g);background:var(--g)}
+.g-check svg{color:#000;opacity:0;transition:opacity .12s;width:10px;height:10px}
+.g-check.checked svg{opacity:1}
 .g-card.completed .g-title-text{text-decoration:line-through;color:var(--t3)}
 .g-title-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .g-desc{font-size:11.5px;color:var(--t3);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .g-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
 .g-tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;padding:3px 8px;border-radius:4px;font-family:var(--m)}
 .g-tag.health{background:var(--gd);color:var(--g)}
 .g-tag.work{background:var(--bld);color:var(--bl2)}
 .g-tag.personal{background:var(--amd);color:var(--am)}
-.g-tag.learning{background:rgba(196,164,74,.1);color:var(--ac2)}
+.g-tag.learning{background:var(--acd);color:var(--ac2)}
 .g-tag.finance{background:var(--gd);color:var(--g)}
 .g-tag.creative{background:rgba(168,85,247,.1);color:#a855f7}
+
 .g-priority{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 7px;border-radius:4px;font-family:var(--m)}
-.g-priority.high{background:var(--rd2);color:var(--r)}
+.g-priority.high{background:var(--rd);color:var(--r)}
 .g-priority.medium{background:var(--amd);color:var(--am)}
 .g-priority.low{background:var(--gd);color:var(--g)}
+
 .g-date{font-size:9px;color:var(--t4);font-family:var(--m);display:flex;align-items:center;gap:4px}
 .g-date.overdue{color:var(--r)}
 .g-date.soon{color:var(--am)}
@@ -87,59 +156,97 @@ body{min-height:100vh;display:flex;flex-direction:column}
 .g-prog-lbl{font-size:9px;color:var(--t4);font-family:var(--m);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
 .g-prog-pct{font-size:11px;font-weight:600;font-family:var(--m);color:var(--t2)}
 .g-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
-.g-fill{height:100%;border-radius:2px;transition:width .35s cubic-bezier(.4,0,.2,1);background:var(--ac)}
-.g-fill.full{background:var(--g)}
+.g-fill{height:100%;border-radius:2px;transition:width .35s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.g-fill.full{background:linear-gradient(90deg,var(--g),#6ee7b7)}
 
 /* Sub-goals */
 .g-subs{margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)}
-.g-sub-toggle{background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:5px;padding:0;margin-bottom:8px;transition:color .1s}
+.g-sub-toggle{
+  background:none;border:none;color:var(--t3);font-size:10px;font-weight:500;cursor:pointer;
+  font-family:var(--f);display:flex;align-items:center;gap:5px;padding:0;margin-bottom:8px;transition:color .1s;
+}
 .g-sub-toggle:hover{color:var(--t2)}
-.g-sub-toggle .arrow{transition:transform .15s;font-size:8px}
+.g-sub-toggle .arrow{transition:transform .15s;display:flex;align-items:center;color:var(--t4)}
 .g-sub-toggle .arrow.open{transform:rotate(90deg)}
-.g-sub-list{display:flex;flex-direction:column;gap:4px}
+.g-sub-list{display:flex;flex-direction:column;gap:4px;overflow:hidden}
+/* JS animates height directly; collapsed is just the closed state */
 .g-sub-list.collapsed{display:none}
-.g-sub{display:flex;align-items:center;gap:8px;padding:5px 0 5px 4px;border-left:2px solid var(--bd);padding-left:12px;transition:border-color .1s}
+.g-sub{
+  display:flex;align-items:center;gap:8px;padding:5px 0 5px 12px;
+  border-left:2px solid var(--bd);transition:border-color .1s;
+}
 .g-sub:hover{border-color:var(--bl)}
-.g-sub .sub-ck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--bl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
-.g-sub .sub-ck:hover{border-color:var(--g);background:var(--gd)}
-.g-sub .sub-ck.checked{border-color:var(--g);background:var(--g)}
-.g-sub .sub-ck.checked svg{opacity:1}
-.g-sub .sub-ck svg{width:8px;height:8px;opacity:0;transition:opacity .1s}
-.g-sub .sub-name{font-size:12px;color:var(--t2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.g-sub .sub-name.done{text-decoration:line-through;color:var(--t4)}
+.sub-ck{
+  width:15px;height:15px;border-radius:4px;border:1.5px solid var(--bl);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s;
+}
+.sub-ck:hover{border-color:var(--g);background:var(--gd)}
+.sub-ck.checked{border-color:var(--g);background:var(--g)}
+.sub-ck svg{color:#000;width:8px;height:8px;opacity:0;transition:opacity .1s}
+.sub-ck.checked svg{opacity:1}
+.sub-name{font-size:12px;color:var(--t2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-name.done{text-decoration:line-through;color:var(--t4)}
 
 /* Card actions */
 .g-actions{position:absolute;top:14px;right:14px;display:flex;gap:4px;opacity:0;transition:opacity .1s}
 .g-card:hover .g-actions{opacity:1}
-.g-actions button{background:var(--s4);border:1px solid var(--bd);color:var(--t3);width:26px;height:26px;border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:11px;transition:all .1s}
+.g-actions button{
+  background:var(--s4);border:1px solid var(--bd);color:var(--t3);
+  width:26px;height:26px;border-radius:6px;cursor:pointer;
+  display:grid;place-items:center;transition:all .1s;
+}
 .g-actions button:hover{background:var(--s5);color:var(--t1);border-color:var(--bl)}
+.g-actions .del-btn:hover{background:var(--rd);color:var(--r);border-color:var(--rb)}
 
 /* Add sub-goal inline */
-.add-sub{display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:4px}
-.add-sub input{flex:1;background:var(--s4);border:1px solid var(--bd);border-radius:5px;padding:5px 8px;color:var(--t1);font-size:11px;font-family:var(--f);outline:none}
-.add-sub input:focus{border-color:var(--ac)}
-.add-sub button{background:var(--ac);color:#000;border:none;border-radius:5px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.add-sub{display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:4px;transition:opacity .15s}
+.add-sub input{
+  flex:1;background:var(--s4);border:1px solid var(--bd);border-radius:5px;
+  padding:5px 8px;color:var(--t1);font-size:11px;font-family:var(--f);outline:none;
+}
+.add-sub input:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--acd)}
+.add-sub button{
+  background:var(--ac);color:#fff;border:none;border-radius:5px;
+  width:24px;height:24px;font-size:14px;font-weight:600;cursor:pointer;
+  display:grid;place-items:center;font-family:var(--f);flex-shrink:0;transition:all .1s;
+}
+.add-sub button:hover{background:var(--ac2)}
 
 /* ═══ Sidebar ═══ */
 .sb-section{margin-bottom:24px}
-.sb-title{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.sb-title{
+  font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
 
-/* Radial progress */
-.radial-wrap{display:flex;justify-content:center;margin-bottom:16px}
-.radial{position:relative;width:120px;height:120px}
-.radial svg{transform:rotate(-90deg)}
-.radial-bg{fill:none;stroke:var(--s4);stroke-width:8}
-.radial-fill{fill:none;stroke:var(--ac);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
-.radial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.radial-pct{font-size:28px;font-weight:700;font-family:var(--m);letter-spacing:-1px;color:var(--t1)}
-.radial-sub{font-size:9px;color:var(--t4);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* Avg progress block */
+.sb-avg-wrap{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:14px;margin-bottom:8px;
+}
+.sb-avg-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
+.sb-avg-num{font-size:34px;font-weight:700;font-family:var(--m);letter-spacing:-2px;color:var(--t1);line-height:1}
+.sb-avg-num span{font-size:16px;color:var(--t3);font-weight:400}
+.sb-avg-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;font-weight:500;padding-bottom:4px}
+.sb-avg-bar{height:5px;background:var(--s5);border-radius:3px;overflow:hidden}
+.sb-avg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .6s cubic-bezier(.4,0,.2,1)}
 
-/* Stat rows */
-.stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
-.stat-row:last-child{border-bottom:none}
-.stat-lbl{font-size:11px;color:var(--t3);font-weight:400;display:flex;align-items:center;gap:6px}
-.stat-lbl .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.stat-val{font-size:12px;font-weight:600;font-family:var(--m);color:var(--t1)}
+/* Stat grid */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.stat-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:11px 12px 9px;
+}
+.stat-card-val{font-size:22px;font-weight:700;font-family:var(--m);letter-spacing:-1px;line-height:1;margin-bottom:3px}
+.stat-card-lbl{font-size:8.5px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+
+/* Category breakdown */
+.cat-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.cat-row:last-child{margin-bottom:0}
+.cat-row-lbl{font-size:11px;color:var(--t2);width:62px;flex-shrink:0;text-transform:capitalize}
+.cat-row-bar{flex:1;height:3px;background:var(--s4);border-radius:2px;overflow:hidden}
+.cat-row-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.cat-row-n{font-size:9px;color:var(--t4);font-family:var(--m);width:14px;text-align:right;flex-shrink:0}
 
 /* Deadline list */
 .dl-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}
@@ -152,34 +259,89 @@ body{min-height:100vh;display:flex;flex-direction:column}
 .dl-date.soon{color:var(--am)}
 
 /* ═══ Modal ═══ */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .12s;backdrop-filter:blur(6px)}
+.mo{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .12s;backdrop-filter:blur(8px);
+}
 .mo.open{opacity:1;pointer-events:auto}
-.mbox{background:var(--s2);border:1px solid var(--bl);border-radius:var(--rl);padding:28px;width:440px;max-height:85vh;overflow-y:auto;transform:scale(.94);transition:transform .15s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh)}
+.mbox{
+  background:var(--s2);border:1px solid var(--bl);border-radius:var(--rl);padding:26px;
+  width:440px;max-height:85vh;overflow-y:auto;
+  transform:scale(.94);transition:transform .15s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--sh),0 0 60px rgba(124,106,247,.07);
+}
 .mo.open .mbox{transform:scale(1)}
-.mbox h2{font-size:16px;font-weight:600;margin-bottom:22px;letter-spacing:-.2px}
-.mbox label{display:block;font-size:9px;color:var(--t4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
-.mbox input,.mbox textarea,.mbox select{width:100%;background:var(--s4);border:1px solid var(--bd);border-radius:6px;padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;margin-bottom:14px;transition:border-color .12s;resize:none}
-.mbox input:focus,.mbox textarea:focus,.mbox select:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acd)}
+.mbox h2{font-size:15px;font-weight:600;margin-bottom:20px;letter-spacing:-.2px}
+.mbox label{
+  display:block;font-size:9px;color:var(--t4);margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.6px;font-weight:600;font-family:var(--m);
+}
+.mbox input,.mbox textarea,.mbox select{
+  width:100%;background:var(--s4);border:1px solid var(--bd);border-radius:7px;
+  padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;
+  margin-bottom:14px;transition:border-color .12s,box-shadow .12s;resize:none;
+}
+.mbox input:focus,.mbox textarea:focus,.mbox select:focus{
+  border-color:var(--ac);box-shadow:0 0 0 3px var(--acd);
+}
 .mbox textarea{height:70px;line-height:1.45}
 .mbox select{cursor:pointer;-webkit-appearance:none;appearance:none}
 .mbox .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.macts{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
-.macts button{padding:8px 22px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f);border:none;transition:all .12s}
-.macts .bc{background:var(--s4);color:var(--t2)}
+.macts{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.macts button{
+  padding:8px 20px;border-radius:var(--radius);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:var(--f);border:none;transition:all .12s;
+}
+.macts .bc{background:var(--s4);color:var(--t2);border:1px solid var(--bd)}
 .macts .bc:hover{background:var(--s5)}
-.macts .bs{background:var(--ac);color:#000}
-.macts .bs:hover{filter:brightness(1.1)}
+.macts .bs{background:var(--ac);color:#fff;box-shadow:0 2px 10px var(--ac-glow)}
+.macts .bs:hover{background:var(--ac2)}
 
-/* Slider */
-.slider-wrap{margin-bottom:14px}
-.slider-wrap input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;background:var(--s4);border-radius:2px;outline:none;margin-top:6px}
-.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);cursor:pointer;border:2px solid var(--bg);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.slider-val{font-size:12px;font-family:var(--m);font-weight:600;color:var(--ac);float:right;margin-top:-18px}
+/* Progress bar input in modal */
+.prog-wrap{margin-bottom:14px}
+.prog-wrap-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prog-wrap-lbl{font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;font-weight:600;font-family:var(--m)}
+.prog-wrap-val{font-size:12px;font-family:var(--m);font-weight:600;color:var(--ac)}
+.prog-track{
+  width:100%;height:6px;background:var(--s4);border-radius:3px;
+  position:relative;cursor:pointer;overflow:hidden;
+}
+.prog-track-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--ac),var(--ac2));
+  transition:width .1s;pointer-events:none;
+}
+.prog-range{
+  position:absolute;inset:0;width:100%;height:100%;
+  -webkit-appearance:none;appearance:none;
+  background:transparent;outline:none;cursor:pointer;margin:0;
+}
+.prog-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--ac2);cursor:pointer;border:2px solid var(--bg);
+  box-shadow:0 0 6px rgba(124,106,247,.5);
+}
+.prog-range::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--ac2);cursor:pointer;border:2px solid var(--bg);
+  box-shadow:0 0 6px rgba(124,106,247,.5);
+}
+.prog-note{font-size:9px;color:var(--t4);margin-top:5px;font-family:var(--m)}
 
 /* ═══ Undo ═══ */
-.undo{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--s3);border:1px solid var(--bl);border-radius:var(--rl);padding:9px 16px;font-size:11px;color:var(--t2);display:flex;align-items:center;gap:12px;z-index:500;transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh)}
+.undo{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--s3);border:1px solid var(--bl);border-radius:var(--rl);
+  padding:9px 16px;font-size:11px;color:var(--t2);
+  display:flex;align-items:center;gap:12px;z-index:500;
+  transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh);
+}
 .undo.show{transform:translateX(-50%) translateY(0)}
-.undo button{background:var(--ac);color:#000;border:none;border-radius:5px;padding:4px 12px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.undo button{
+  background:var(--ac);color:#fff;border:none;border-radius:5px;
+  padding:4px 12px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--f);
+}
 
 /* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar{width:5px}
@@ -188,12 +350,62 @@ body{min-height:100vh;display:flex;flex-direction:column}
 
 /* ═══ Animations ═══ */
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@keyframes popIn{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
-.g-card{animation:fadeIn .2s ease both}
+@keyframes cardFadeSlideDown{
+  0%  {opacity:1;transform:translateY(0)  scale(1)}
+  100%{opacity:0;transform:translateY(22px) scale(.97)}
+}
+@keyframes cardSettle{
+  0%  {opacity:0;transform:translateY(-14px) scale(.98)}
+  70% {opacity:1}
+  100%{opacity:1;transform:translateY(0)  scale(1)}
+}
+.g-card{animation:fadeIn .18s ease both}
+.goal-list.no-anim .g-card{animation:none !important}
+.g-card.exiting{
+  animation:cardFadeSlideDown .28s cubic-bezier(.4,0,1,1) forwards !important;
+  pointer-events:none;
+}
+.g-card.settling{
+  animation:cardSettle .38s cubic-bezier(.34,1.15,.64,1) both !important;
+  outline:1px solid var(--acm);outline-offset:-1px;
+  animation-delay:.04s;
+}
+
+/* ─── Confirm Delete Modal ─── */
+.confirm-mo{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .15s;backdrop-filter:blur(10px);
+}
+.confirm-mo.open{opacity:1;pointer-events:auto}
+.confirm-box{
+  background:var(--s2);border:1px solid var(--bl);border-radius:14px;padding:24px;
+  width:340px;
+  transform:scale(.93) translateY(8px);
+  transition:transform .18s cubic-bezier(.34,1.3,.64,1);
+  box-shadow:0 12px 48px rgba(0,0,0,.6),0 0 60px rgba(248,113,113,.06);
+}
+.confirm-mo.open .confirm-box{transform:scale(1) translateY(0)}
+.confirm-icon{
+  width:40px;height:40px;border-radius:10px;background:var(--rd);border:1px solid var(--rb);
+  display:grid;place-items:center;color:var(--r);margin-bottom:14px;
+}
+.confirm-title{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:6px;letter-spacing:-.2px}
+.confirm-desc{font-size:12px;color:var(--t3);line-height:1.5;margin-bottom:20px}
+.confirm-desc strong{color:var(--t2);font-weight:500}
+.confirm-acts{display:flex;gap:8px;justify-content:flex-end}
+.confirm-acts button{
+  padding:8px 18px;border-radius:var(--radius);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:var(--f);border:none;transition:all .12s;
+}
+.confirm-cancel{background:var(--s4);color:var(--t2);border:1px solid var(--bd) !important}
+.confirm-cancel:hover{background:var(--s5);color:var(--t1)}
+.confirm-delete{background:var(--r);color:#fff;box-shadow:0 2px 10px rgba(248,113,113,.25)}
+.confirm-delete:hover{background:#ff8080}
 
 @media(max-width:900px){
   .main{grid-template-columns:1fr}
-  .sidebar{border-top:1px solid var(--bd);border-right:none}
+  .sidebar{border-top:1px solid var(--bd)}
   .goal-list{border-right:none}
 }
 @media(max-width:600px){
@@ -207,15 +419,23 @@ body{min-height:100vh;display:flex;flex-direction:column}
 <body>
 
 <div class="hdr">
-  <div class="hdr-l"><div class="logo">P</div><h1>Goals<em>tracker</em></h1></div>
+  <div class="hdr-l">
+    <div class="logo">
+      <span class="icon"><i data-lucide="zap" style="width:14px;height:14px"></i></span>
+    </div>
+    <h1>Goals <em>tracker</em></h1>
+  </div>
   <div class="hdr-r">
     <div class="filter-bar" id="filters">
       <button class="active" onclick="setFilter('all',this)">All</button>
       <button onclick="setFilter('active',this)">Active</button>
       <button onclick="setFilter('completed',this)">Done</button>
-      <button onclick="setFilter('high',this)">High ⚡</button>
+      <button onclick="setFilter('high',this)">High</button>
     </div>
-    <button class="btn-add" onclick="openMo()">+ New goal</button>
+    <button class="btn-add" onclick="openMo()">
+      <span class="icon"><i data-lucide="plus" style="width:13px;height:13px"></i></span>
+      New goal
+    </button>
   </div>
 </div>
 
@@ -224,7 +444,10 @@ body{min-height:100vh;display:flex;flex-direction:column}
   <div class="sidebar" id="sidebar"></div>
 </div>
 
-<div class="undo" id="undoT"><span id="undoM"></span><button onclick="doUndo()">Undo</button></div>
+<div class="undo" id="undoT">
+  <span id="undoM"></span>
+  <button onclick="doUndo()">Undo</button>
+</div>
 
 <div class="mo" id="mo" onclick="if(event.target===this)closeMo()">
   <div class="mbox">
@@ -234,35 +457,71 @@ body{min-height:100vh;display:flex;flex-direction:column}
     <label>Description</label>
     <textarea id="gDesc" placeholder="What does success look like?"></textarea>
     <div class="row">
-      <div><label>Category</label><select id="gCat">
-        <option value="work">Work</option><option value="personal">Personal</option><option value="health">Health</option>
-        <option value="learning">Learning</option><option value="finance">Finance</option><option value="creative">Creative</option>
-      </select></div>
-      <div><label>Priority</label><select id="gPri">
-        <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-      </select></div>
+      <div>
+        <label>Category</label>
+        <select id="gCat">
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="health">Health</option>
+          <option value="learning">Learning</option>
+          <option value="finance">Finance</option>
+          <option value="creative">Creative</option>
+        </select>
+      </div>
+      <div>
+        <label>Priority</label>
+        <select id="gPri">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
     </div>
     <div class="row">
       <div><label>Start date</label><input type="date" id="gStart"></div>
       <div><label>End date</label><input type="date" id="gEnd"></div>
     </div>
-    <div class="slider-wrap">
-      <label>Progress</label>
-      <span class="slider-val" id="sliderVal">0%</span>
-      <input type="range" id="gProg" min="0" max="100" value="0" oninput="document.getElementById('sliderVal').textContent=this.value+'%'">
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-wrap-top">
+        <span class="prog-wrap-lbl">Progress</span>
+        <span class="prog-wrap-val" id="sliderVal">0%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-track-fill" id="progFill" style="width:0%"></div>
+        <input type="range" class="prog-range" id="gProg" min="0" max="100" value="0"
+          oninput="updateProgBar(this.value)">
+      </div>
+      <div class="prog-note" id="progNote"></div>
     </div>
-    <div class="macts"><button class="bc" onclick="closeMo()">Cancel</button><button class="bs" onclick="saveGoal()">Save</button></div>
+    <div class="macts">
+      <button class="bc" onclick="closeMo()">Cancel</button>
+      <button class="bs" onclick="saveGoal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="confirm-mo" id="confirmMo">
+  <div class="confirm-box">
+    <div class="confirm-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </div>
+    <div class="confirm-title">Delete this goal?</div>
+    <div class="confirm-desc">Are you sure you want to delete <strong id="confirmGoalName"></strong>? This can be undone.</div>
+    <div class="confirm-acts">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-delete" id="confirmDelBtn">Delete</button>
+    </div>
   </div>
 </div>
 
 <script>
-const SK='pulsar_goals_v1';
+const SK='pulsar_goals_v3';
 let S={goals:[]},editId=null,filter='all',undoStack=[];
 
-// ═══ Persistence ═══
+// ─── Persistence ───
 function save(){localStorage.setItem(SK,JSON.stringify(S))}
 function load(){const r=localStorage.getItem(SK);if(r){try{S=JSON.parse(r)}catch(e){seed()}}else seed()}
-
 function gid(){return 'g_'+Math.random().toString(36).slice(2,9)}
 
 function seed(){
@@ -300,21 +559,40 @@ function seed(){
 function fmt(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function parseD(s){if(!s)return null;const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
 function daysLeft(end){if(!end)return null;const e=parseD(end),n=new Date();n.setHours(0,0,0,0);return Math.ceil((e-n)/(1000*60*60*24))}
-function fmtDate(s){if(!s)return '';const d=parseD(s);return d.toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}
 function fmtShort(s){if(!s)return '';const d=parseD(s);return d.toLocaleDateString('en',{month:'short',day:'numeric'})}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
-// ═══ Undo ═══
-function pushU(msg,fn){undoStack.push({msg,fn});const t=document.getElementById('undoT');document.getElementById('undoM').textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500)}
+// ─── SVG icon helper (for dynamically rendered content) ───
+function iconSVG(name,size=12){
+  const icons={
+    check:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    pencil:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
+    trash:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+    chevron:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    plus:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    calendar:`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`
+  };
+  return icons[name]||'';
+}
+
+// ─── Undo ───
+function pushU(msg,fn){
+  undoStack.push({msg,fn});
+  const t=document.getElementById('undoT');
+  document.getElementById('undoM').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
 function doUndo(){if(!undoStack.length)return;undoStack.pop().fn();save();render();document.getElementById('undoT').classList.remove('show')}
 
-// ═══ Filter ═══
+// ─── Filter ───
 function setFilter(f,btn){
   filter=f;
   document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
-
 function filtered(){
   return S.goals.filter(g=>{
     if(filter==='active')return !g.completed;
@@ -324,24 +602,40 @@ function filtered(){
   });
 }
 
-// ═══ Render ═══
-function render(){
-  renderGoals();
-  renderSidebar();
-}
+// ─── Render ───
+let _softMode=false;
+function render(){renderGoals();renderSidebar()}
 
 function renderGoals(){
-  const gl=document.getElementById('goalList'),goals=filtered();
+  const gl=document.getElementById('goalList');
+  if(_softMode) gl.classList.add('no-anim');
+  else gl.classList.remove('no-anim');
+  const goals=filtered();
   if(!S.goals.length){
-    gl.innerHTML=`<div class="empty"><div class="empty-i">🎯</div><h2>Set your first goal</h2><p>Define what you want to achieve, break it into milestones, and track your progress over time.</p><button onclick="openMo()">+ New goal</button></div>`;
-    return;
+    gl.innerHTML=`<div class="empty">
+      <div class="empty-i">${iconSVG('check',22)}</div>
+      <h2>Set your first goal</h2>
+      <p>Define what you want to achieve, break it into milestones, and track your progress over time.</p>
+      <button onclick="openMo()">${iconSVG('plus',14)} New goal</button>
+    </div>`;
+    initIcons();return;
   }
   if(!goals.length){
-    gl.innerHTML=`<div class="empty"><div class="empty-i">🔍</div><h2>No goals match</h2><p>Try a different filter.</p></div>`;
-    return;
+    gl.innerHTML=`<div class="empty">
+      <div class="empty-i">${iconSVG('check',22)}</div>
+      <h2>No goals match</h2>
+      <p>Try a different filter.</p>
+    </div>`;
+    initIcons();return;
   }
+
+  // Sort: active first, completed at bottom
+  const active=goals.filter(g=>!g.completed);
+  const done=goals.filter(g=>g.completed);
+  const sorted=[...active,...done];
+
   let h='';
-  goals.forEach((g,gi)=>{
+  sorted.forEach((g,gi)=>{
     const dl=daysLeft(g.end),overdue=dl!==null&&dl<0,soon=dl!==null&&dl>=0&&dl<=7;
     const subsDone=g.subs?g.subs.filter(s=>s.done).length:0;
     const subsTotal=g.subs?g.subs.length:0;
@@ -350,14 +644,14 @@ function renderGoals(){
 
     h+=`<div class="g-card${g.completed?' completed':''}" data-id="${g.id}" style="animation-delay:${gi*30}ms">
       <div class="g-actions">
-        <button onclick="editGoal('${g.id}')" title="Edit">✏️</button>
-        <button onclick="delGoal('${g.id}')" title="Delete">🗑</button>
+        <button onclick="editGoal('${g.id}')" title="Edit">${iconSVG('pencil',13)}</button>
+        <button class="del-btn" onclick="delGoal('${g.id}')" title="Delete">${iconSVG('trash',13)}</button>
       </div>
       <div class="g-top">
         <div class="g-title-area">
           <div class="g-title">
             <span class="g-check${g.completed?' checked':''}" onclick="toggleComplete('${g.id}')">
-              <svg viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><polyline points="2.5 6 5 8.5 9.5 3.5"/></svg>
+              ${iconSVG('check',10)}
             </span>
             <span class="g-title-text">${esc(g.title)}</span>
           </div>
@@ -365,7 +659,7 @@ function renderGoals(){
           <div class="g-meta">
             <span class="g-tag ${g.cat}">${g.cat}</span>
             <span class="g-priority ${g.pri}">${g.pri}</span>
-            ${g.end?`<span class="g-date${overdue?' overdue':''}${soon?' soon':''}">📅 ${fmtShort(g.end)}${overdue?' · overdue':soon?' · '+dl+'d left':''}</span>`:''}
+            ${g.end?`<span class="g-date${overdue?' overdue':''}${soon?' soon':''}">${iconSVG('calendar',9)} ${fmtShort(g.end)}${overdue?' · overdue':soon?' · '+dl+'d left':''}</span>`:''}
           </div>
         </div>
       </div>
@@ -374,18 +668,18 @@ function renderGoals(){
         <div class="g-bar"><div class="g-fill ${fillCls}" style="width:${pct}%"></div></div>
       </div>`;
 
-    // Sub-goals
     if(subsTotal>0){
       const coll=g.collapsed;
       h+=`<div class="g-subs">
         <button class="g-sub-toggle" onclick="toggleCollapse('${g.id}')">
-          <span class="arrow${coll?'':' open'}">▶</span> ${subsDone}/${subsTotal} milestones
+          <span class="arrow${coll?'':' open'}">${iconSVG('chevron',11)}</span>
+          ${subsDone}/${subsTotal} milestones
         </button>
         <div class="g-sub-list${coll?' collapsed':''}">`;
       g.subs.forEach(s=>{
         h+=`<div class="g-sub">
           <span class="sub-ck${s.done?' checked':''}" onclick="toggleSub('${g.id}','${s.id}')">
-            <svg viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><polyline points="2.5 6 5 8.5 9.5 3.5"/></svg>
+            ${iconSVG('check',8)}
           </span>
           <span class="sub-name${s.done?' done':''}">${esc(s.name)}</span>
         </div>`;
@@ -393,56 +687,84 @@ function renderGoals(){
       h+=`</div>
         <div class="add-sub">
           <input placeholder="Add milestone..." onkeydown="if(event.key==='Enter')addSub('${g.id}',this)">
-          <button onclick="addSub('${g.id}',this.previousElementSibling)">+</button>
+          <button onclick="addSub('${g.id}',this.previousElementSibling)">${iconSVG('plus',12)}</button>
         </div>
       </div>`;
     } else {
       h+=`<div class="g-subs" style="border-top:none;padding-top:6px">
         <div class="add-sub" style="padding-left:0">
           <input placeholder="Add milestone..." onkeydown="if(event.key==='Enter')addSub('${g.id}',this)">
-          <button onclick="addSub('${g.id}',this.previousElementSibling)">+</button>
+          <button onclick="addSub('${g.id}',this.previousElementSibling)">${iconSVG('plus',12)}</button>
         </div>
       </div>`;
     }
     h+=`</div>`;
   });
   gl.innerHTML=h;
+  initIcons();
 }
 
 function renderSidebar(){
   const sb=document.getElementById('sidebar');
   const total=S.goals.length,done=S.goals.filter(g=>g.completed).length,active=total-done;
   const avgProg=total?Math.round(S.goals.reduce((a,g)=>a+(g.completed?100:g.progress),0)/total):0;
-  const circ=2*Math.PI*52;
-  const offset=circ-(circ*avgProg/100);
-
-  // Upcoming deadlines
+  const highPri=S.goals.filter(g=>g.pri==='high'&&!g.completed).length;
   const upcoming=S.goals.filter(g=>!g.completed&&g.end).sort((a,b)=>parseD(a.end)-parseD(b.end)).slice(0,5);
 
+  const cats=['work','health','learning','personal','finance','creative'];
+  const catColors={'work':'var(--bl2)','health':'var(--g)','learning':'var(--ac2)','personal':'var(--am)','finance':'var(--g)','creative':'#a855f7'};
+  const catCounts={};
+  cats.forEach(c=>catCounts[c]=S.goals.filter(g=>g.cat===c&&!g.completed).length);
+  const maxCat=Math.max(1,...Object.values(catCounts));
+  const activeCats=cats.filter(c=>catCounts[c]>0);
+
   let h=`<div class="sb-section">
-    <div class="sb-title">Overall progress</div>
-    <div class="radial-wrap">
-      <div class="radial">
-        <svg width="120" height="120" viewBox="0 0 120 120">
-          <circle class="radial-bg" cx="60" cy="60" r="52"/>
-          <circle class="radial-fill" cx="60" cy="60" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-        </svg>
-        <div class="radial-center">
-          <span class="radial-pct">${avgProg}%</span>
-          <span class="radial-sub">Average</span>
+    <div class="sb-title">Metrics</div>
+    <div class="sb-avg-wrap">
+      <div class="sb-avg-top">
+        <div>
+          <div class="sb-avg-lbl">Avg progress</div>
+          <div class="sb-avg-num">${avgProg}<span>%</span></div>
         </div>
       </div>
+      <div class="sb-avg-bar"><div class="sb-avg-fill" style="width:${avgProg}%"></div></div>
     </div>
-    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--ac)"></span>Total goals</span><span class="stat-val">${total}</span></div>
-    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--bl2)"></span>Active</span><span class="stat-val">${active}</span></div>
-    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--g)"></span>Completed</span><span class="stat-val">${done}</span></div>
-    <div class="stat-row"><span class="stat-lbl"><span class="sdot" style="background:var(--r)"></span>High priority</span><span class="stat-val">${S.goals.filter(g=>g.pri==='high'&&!g.completed).length}</span></div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--ac2)">${active}</div>
+        <div class="stat-card-lbl">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--g)">${done}</div>
+        <div class="stat-card-lbl">Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--t1)">${total}</div>
+        <div class="stat-card-lbl">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--r)">${highPri}</div>
+        <div class="stat-card-lbl">High pri</div>
+      </div>
+    </div>
   </div>`;
+
+  if(activeCats.length){
+    h+=`<div class="sb-section"><div class="sb-title">By category</div>`;
+    activeCats.forEach(c=>{
+      h+=`<div class="cat-row">
+        <span class="cat-row-lbl">${c}</span>
+        <span class="cat-row-bar"><span class="cat-row-fill" style="width:${Math.round(catCounts[c]/maxCat*100)}%;background:${catColors[c]}"></span></span>
+        <span class="cat-row-n">${catCounts[c]}</span>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
 
   if(upcoming.length){
     h+=`<div class="sb-section"><div class="sb-title">Upcoming deadlines</div>`;
     upcoming.forEach(g=>{
-      const dl=daysLeft(g.end),ov=dl<0,sn=dl>=0&&dl<=7;
+      const dl=daysLeft(g.end),ov=dl!==null&&dl<0,sn=dl!==null&&dl>=0&&dl<=7;
       h+=`<div class="dl-item">
         <span class="dl-dot" style="background:${ov?'var(--r)':sn?'var(--am)':'var(--t4)'}"></span>
         <div class="dl-info">
@@ -453,36 +775,167 @@ function renderSidebar(){
     });
     h+=`</div>`;
   }
+
   sb.innerHTML=h;
+  initIcons();
 }
 
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function initIcons(){
+  if(window.lucide)lucide.createIcons();
+}
 
-// ═══ Actions ═══
+// ─── Progress helpers ───
+// Single source of truth: recompute progress & completed from subs (if any)
+function syncGoal(g){
+  if(g.subs && g.subs.length>0){
+    const done=g.subs.filter(s=>s.done).length;
+    g.progress=Math.round(done/g.subs.length*100);
+    g.completed=(done===g.subs.length);
+  }
+  // no subs: progress & completed are set manually, don't touch them
+}
+
+// ─── Actions ───
 function toggleComplete(id){
   const g=S.goals.find(x=>x.id===id);if(!g)return;
-  const prev=g.completed;
-  g.completed=!g.completed;
-  if(g.completed)g.progress=100;
-  else g.progress=prev?0:g.progress;
-  save();render();
+
+  if(!g.completed){
+    g.completed=true;
+    g.progress=100;
+    if(g.subs&&g.subs.length) g.subs.forEach(s=>s.done=true);
+  } else {
+    g.completed=false;
+    if(g.subs&&g.subs.length){
+      g.subs.forEach(s=>s.done=false);
+      g.progress=0;
+    } else {
+      g.progress=0;
+    }
+  }
+  save();
+  flipRender(id);
+}
+
+// FLIP animation: record positions → update DOM → animate from old to new
+function flipRender(movedId){
+  const gl=document.getElementById('goalList');
+  const cards=[...gl.querySelectorAll('.g-card[data-id]')];
+
+  // 1. Record every card's top position before the re-render
+  const before={};
+  cards.forEach(card=>{
+    before[card.dataset.id]=card.getBoundingClientRect().top;
+  });
+
+  // 2. Re-render without entry animations
+  _softMode=true;
+  renderGoals();
+  renderSidebar();
+  _softMode=false;
+
+  // 3. For each card that still exists, animate from its old position to new
+  const newCards=[...gl.querySelectorAll('.g-card[data-id]')];
+  newCards.forEach(card=>{
+    const cid=card.dataset.id;
+    const newTop=card.getBoundingClientRect().top;
+    const oldTop=before[cid];
+
+    if(oldTop===undefined){
+      // brand-new card (just appeared at bottom) — settle in
+      card.style.animation='none';
+      card.offsetHeight;
+      card.classList.add('settling');
+      return;
+    }
+
+    const delta=oldTop-newTop;
+    if(Math.abs(delta)<2) return; // didn't move, skip
+
+    // Snap to old position instantly, then transition to natural position
+    card.style.transition='none';
+    card.style.transform=`translateY(${delta}px)`;
+    card.style.opacity= cid===movedId ? '0.5' : '1';
+    card.offsetHeight; // force reflow
+
+    const duration = cid===movedId ? 420 : 320;
+    const easing   = cid===movedId
+      ? 'cubic-bezier(.4,0,.2,1)'
+      : 'cubic-bezier(.25,1,.5,1)';
+
+    card.style.transition=`transform ${duration}ms ${easing}, opacity 200ms ease`;
+    card.style.transform='translateY(0)';
+    card.style.opacity='1';
+
+    card.addEventListener('transitionend',()=>{
+      card.style.transition='';
+      card.style.transform='';
+      card.style.opacity='';
+      // pulse the moved card when it arrives
+      if(cid===movedId){
+        card.style.outline='1px solid var(--acm)';
+        setTimeout(()=>card.style.outline='',600);
+      }
+    },{once:true});
+  });
 }
 
 function toggleCollapse(id){
   const g=S.goals.find(x=>x.id===id);if(!g)return;
-  g.collapsed=!g.collapsed;save();render();
+  const card=document.querySelector(`.g-card[data-id="${id}"]`);
+  const list=card?card.querySelector('.g-sub-list'):null;
+  const arrow=card?card.querySelector('.g-sub-toggle .arrow'):null;
+  if(!list)return;
+
+  // kill any in-progress transition cleanly
+  list.style.transition='none';
+  list.style.height=list.scrollHeight+'px';
+  list.style.overflow='hidden';
+  list.style.opacity= g.collapsed ? '0' : '1';
+  list.classList.remove('collapsed');
+
+  if(g.collapsed){
+    // ── expand ──
+    g.collapsed=false; save();
+    if(arrow) arrow.classList.add('open');
+    const targetH=list.scrollHeight+'px';
+    // two rAFs: first commits the "from" state, second starts the transition
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      list.style.transition='height .28s cubic-bezier(.4,0,.2,1), opacity .22s ease';
+      list.style.height=targetH;
+      list.style.opacity='1';
+      list.addEventListener('transitionend',()=>{
+        list.style.cssText=''; // clear all inline styles, let CSS take over
+      },{once:true});
+    }));
+  } else {
+    // ── collapse ──
+    g.collapsed=true; save();
+    if(arrow) arrow.classList.remove('open');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      list.style.transition='height .24s cubic-bezier(.4,0,.2,1), opacity .18s ease';
+      list.style.height='0px';
+      list.style.opacity='0';
+      list.addEventListener('transitionend',()=>{
+        list.style.cssText='';
+        list.classList.add('collapsed');
+      },{once:true});
+    }));
+  }
 }
 
 function toggleSub(gid,sid){
   const g=S.goals.find(x=>x.id===gid);if(!g)return;
   const s=g.subs.find(x=>x.id===sid);if(!s)return;
   s.done=!s.done;
-  // Auto-update progress based on subs
-  if(g.subs.length){
-    g.progress=Math.round(g.subs.filter(x=>x.done).length/g.subs.length*100);
-    if(g.progress>=100)g.completed=true;
+  const wasCompleted=g.completed;
+  syncGoal(g);
+  save();
+  // if completion state changed, FLIP animate the re-sort
+  if(g.completed!==wasCompleted){
+    flipRender(gid);
+  } else {
+    softRender(gid);
   }
-  save();render();
 }
 
 function addSub(gid,input){
@@ -491,17 +944,40 @@ function addSub(gid,input){
   if(!g.subs)g.subs=[];
   g.subs.push({id:gid+Math.random().toString(36).slice(2,6),name,done:false});
   g.collapsed=false;
-  // Recalc progress
-  g.progress=Math.round(g.subs.filter(x=>x.done).length/g.subs.length*100);
-  input.value='';save();render();
+  syncGoal(g);
+  input.value='';save();softRender(gid);
 }
 
+let _pendingDeleteId=null;
 function delGoal(id){
+  const g=S.goals.find(x=>x.id===id);if(!g)return;
+  _pendingDeleteId=id;
+  document.getElementById('confirmGoalName').textContent='"'+g.title+'"';
+  document.getElementById('confirmDelBtn').onclick=confirmDelete;
+  document.getElementById('confirmMo').classList.add('open');
+}
+function closeConfirm(){
+  document.getElementById('confirmMo').classList.remove('open');
+  _pendingDeleteId=null;
+}
+function confirmDelete(){
+  const id=_pendingDeleteId;if(!id)return;
+  closeConfirm();
+  const card=document.querySelector(`.g-card[data-id="${id}"]`);
   const prev=JSON.parse(JSON.stringify(S.goals));
   const nm=S.goals.find(g=>g.id===id)?.title||'';
-  S.goals=S.goals.filter(g=>g.id!==id);
-  save();render();
-  pushU(`Deleted "${nm}"`,()=>{S.goals=prev});
+  if(card){
+    card.classList.add('exiting');
+    setTimeout(()=>{
+      S.goals=S.goals.filter(g=>g.id!==id);
+      save();render();
+      pushU(`Deleted "${nm}"`,()=>{S.goals=prev});
+    },260);
+  } else {
+    S.goals=S.goals.filter(g=>g.id!==id);
+    save();render();
+    pushU(`Deleted "${nm}"`,()=>{S.goals=prev});
+  }
 }
 
 function editGoal(id){
@@ -514,12 +990,22 @@ function editGoal(id){
   document.getElementById('gPri').value=g.pri;
   document.getElementById('gStart').value=g.start||'';
   document.getElementById('gEnd').value=g.end||'';
-  document.getElementById('gProg').value=g.progress;
-  document.getElementById('sliderVal').textContent=g.progress+'%';
+  // if goal has milestones, progress is milestone-driven — show it but disable slider
+  const hasSubs=g.subs&&g.subs.length>0;
+  document.getElementById('progNote').textContent=hasSubs?'Controlled by milestones':'';
+  document.getElementById('progWrap').style.opacity=hasSubs?'.5':'1';
+  document.getElementById('progWrap').style.pointerEvents=hasSubs?'none':'';
+  updateProgBar(g.progress);
   document.getElementById('mo').classList.add('open');
 }
 
-// ═══ Modal ═══
+// ─── Modal ───
+function updateProgBar(val){
+  val=Math.min(100,Math.max(0,+val));
+  document.getElementById('sliderVal').textContent=val+'%';
+  document.getElementById('progFill').style.width=val+'%';
+  document.getElementById('gProg').value=val;
+}
 function openMo(){
   editId=null;
   document.getElementById('moTi').textContent='New goal';
@@ -529,8 +1015,10 @@ function openMo(){
   document.getElementById('gPri').value='medium';
   document.getElementById('gStart').value=fmt(new Date());
   document.getElementById('gEnd').value='';
-  document.getElementById('gProg').value=0;
-  document.getElementById('sliderVal').textContent='0%';
+  document.getElementById('progNote').textContent='';
+  document.getElementById('progWrap').style.opacity='1';
+  document.getElementById('progWrap').style.pointerEvents='';
+  updateProgBar(0);
   document.getElementById('mo').classList.add('open');
   setTimeout(()=>document.getElementById('gTitle').focus(),100);
 }
@@ -549,21 +1037,35 @@ function saveGoal(){
   };
   if(editId){
     const g=S.goals.find(x=>x.id===editId);
-    if(g)Object.assign(g,data);
+    if(g){
+      Object.assign(g,data);
+      // if goal has subs, ignore manual progress & re-sync from subs
+      if(g.subs&&g.subs.length) syncGoal(g);
+      else g.completed=(g.progress>=100);
+    }
   }else{
-    S.goals.unshift({id:gid(),...data,subs:[],collapsed:false,completed:data.progress>=100});
+    const ng={id:gid(),...data,subs:[],collapsed:false,completed:data.progress>=100};
+    S.goals.unshift(ng);
   }
   save();closeMo();render();
 }
 
-// ═══ Keys ═══
+// ─── softRender: re-render without triggering card entry animations ───
+function softRender(id){
+  _softMode=true;
+  render();
+  _softMode=false;
+}
+
+// ─── Keys ───
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeMo();
+  if(e.key==='Escape'){closeMo();closeConfirm();}
   if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo()}
 });
 
-// ═══ Init ═══
+// ─── Init ───
 load();render();
+window.addEventListener('load',initIcons);
 </script>
 </body>
 </html>
